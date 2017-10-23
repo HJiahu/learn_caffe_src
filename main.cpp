@@ -1,6 +1,6 @@
 #include<iostream>
 #include<vector>
-#include"classifier.h"
+#include"classifier.hpp"
 
 using namespace std;
 
@@ -17,9 +17,7 @@ int main()
     }
     
     results = classifier.Classify (img);
-
 #ifdef _MSC_VER
-	system("pause");
+    system ("pause");
 #endif
-
 }

@@ -129,6 +129,7 @@ namespace caffe
              *        the second to last if index == -2, etc.
              *        Dies on out of range index.
              */
+			//用于调整下标。C++数组不支持负数下标，当前函数的意义就是将负数转化为对应的正数下标
             inline int CanonicalAxisIndex (int axis_index) const
             {
                 CHECK_GE (axis_index, -num_axes())
@@ -271,6 +272,7 @@ namespace caffe
             Dtype* mutable_cpu_diff();
             Dtype* mutable_gpu_diff();
             void Update();
+			//从caffe.proto中定义的blob格式转化为blob.hpp中定义的blob格式
             void FromProto (const BlobProto& proto, bool reshape = true);
             void ToProto (BlobProto* proto, bool write_diff = false) const;
             

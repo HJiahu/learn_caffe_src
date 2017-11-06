@@ -43,10 +43,10 @@ namespace caffe
                 : layer_param_ (param)
             {
                 // Set phase and copy blobs (if there are any).
-				//设定layer是用于训练还是测试
+                //设定layer是用于训练还是测试
                 phase_ = param.phase();
                 
-				//将模型中的blob转化为内存中便于训练的blob，就是blob.hpp中定义的blob的格式
+                //将模型中的blob转化为内存中便于训练的blob，就是blob.hpp中定义的blob的格式
                 if (layer_param_.blobs_size() > 0)
                 {
                     blobs_.resize (layer_param_.blobs_size());
@@ -76,13 +76,14 @@ namespace caffe
             void SetUp (const vector<Blob<Dtype>*>& bottom,
                         const vector<Blob<Dtype>*>& top)
             {
-				//测试数据结构是否正确
+                //测试数据结构是否正确
                 CheckBlobCounts (bottom, top);
-				//这个函数需要被重写以应对不同的层
+                //这个函数需要被重写以应对不同的层
                 LayerSetUp (bottom, top);
-				//
+                //
                 Reshape (bottom, top);
-				//在刚开始读代码时可以不必理解下面函数的作用，因为其设计到loss值，在后面会遇到
+                //在刚开始读代码时可以不必理解下面函数的作用，因为其设计到loss值，在后面会遇到
+                //这个函数很可能用于训练，从top层获得当前层的损失值，从而实现反向传输算法
                 SetLossWeights (top);
             }
             

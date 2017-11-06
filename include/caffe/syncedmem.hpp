@@ -17,6 +17,7 @@ namespace caffe
     // The improvement in performance seems negligible in the single GPU case,
     // but might be more significant for parallel training. Most importantly,
     // it improved stability for large models on many GPUs.
+    //下面几个函数用于内存的分配与清除（类似于C中的malloc和free），首先判断使用何种方法，例如：cuda、MKL等
     inline void CaffeMallocHost (void** ptr, size_t size, bool* use_cuda)
     {
 #ifndef CPU_ONLY

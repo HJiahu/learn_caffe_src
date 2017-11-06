@@ -30,11 +30,11 @@ namespace caffe
                 
             /// @brief Deprecated; use <code>Blob(const vector<int>& shape)</code>.
             //The conventional blob dimensions for batches of image data are number N x channel K x height H x width W.
-            explicit Blob (const int num, const int channels, const int height,const int width);
+            explicit Blob (const int num, const int channels, const int height, const int width);
             explicit Blob (const vector<int>& shape);
             
             /// @brief Deprecated; use <code>Reshape(const vector<int>& shape)</code>.
-            void Reshape (const int num, const int channels, const int height,const int width);
+            void Reshape (const int num, const int channels, const int height, const int width);
             /**
              * @brief Change the dimensions of the blob, allocating new memory if
              *        necessary.
@@ -64,7 +64,7 @@ namespace caffe
                 stream << "(" << count_ << ")";
                 return stream.str();
             }
-			//返回内容包含 N K H W
+            //返回内容包含 N K H W
             inline const vector<int>& shape() const { return shape_; }
             /**
              * @brief Returns the dimension of the index-th axis (or the negative index-th
@@ -89,8 +89,8 @@ namespace caffe
              *
              * @param end_axis The first axis to exclude from the slice.
              */
-			//返回在指定纬度（前闭后开）内元素的个数，例如BLOB中保存了n张高宽分别为h，w的RGB图像，则对于blob而言
-			//count(0,1)返回的为n，count(1,2)返回的是3，count(0,2)返回的是3*n
+            //返回在指定纬度（前闭后开）内元素的个数，例如BLOB中保存了n张高宽分别为h，w的RGB图像，则对于blob而言
+            //count(0,1)返回的为n，count(1,2)返回的是3，count(0,2)返回的是3*n
             inline int count (int start_axis, int end_axis) const
             {
                 CHECK_LE (start_axis, end_axis);
@@ -129,7 +129,7 @@ namespace caffe
              *        the second to last if index == -2, etc.
              *        Dies on out of range index.
              */
-			//用于调整下标。C++数组不支持负数下标，当前函数的意义就是将负数转化为对应的正数下标
+            //用于调整下标。C++数组不支持负数下标，当前函数的意义就是将负数转化为对应的正数下标
             inline int CanonicalAxisIndex (int axis_index) const
             {
                 CHECK_GE (axis_index, -num_axes())
@@ -148,13 +148,13 @@ namespace caffe
             }
             
             /// @brief Deprecated legacy shape accessor num: use shape(0) instead.
-			//当前批次的blob中有多少张图片
+            //当前批次的blob中有多少张图片
             inline int num() const { return LegacyShape (0); }
             /// @brief Deprecated legacy shape accessor channels: use shape(1) instead.
-			//图片的通道数，对于RGB彩色而言是3
+            //图片的通道数，对于RGB彩色而言是3
             inline int channels() const { return LegacyShape (1); }
             /// @brief Deprecated legacy shape accessor height: use shape(2) instead.
-			//下面两个函数返回的是图像的高度和宽度
+            //下面两个函数返回的是图像的高度和宽度
             inline int height() const { return LegacyShape (2); }
             /// @brief Deprecated legacy shape accessor width: use shape(3) instead.
             inline int width() const { return LegacyShape (3); }
@@ -187,14 +187,14 @@ namespace caffe
                 CHECK_LE (h, height());
                 CHECK_GE (width(), 0);
                 CHECK_LE (w, width());
-				//一层一层往下分BLOB的基本元素分别为：图像->通道->行->列（这里已经是最小的元素了）
-				//n*channels()+c 表示的是当前元素所处的通道的索引
-				//( (n * channels() + c) * height() + h)  当前元素所处的行所在的索引
-				//最后求的就是当前元素的索引了
+                //一层一层往下分BLOB的基本元素分别为：图像->通道->行->列（这里已经是最小的元素了）
+                //n*channels()+c 表示的是当前元素所处的通道的索引
+                //( (n * channels() + c) * height() + h)  当前元素所处的行所在的索引
+                //最后求的就是当前元素的索引了
                 return ( (n * channels() + c) * height() + h) * width() + w;
             }
             
-			//
+            //
             inline int offset (const vector<int>& indices) const
             {
                 CHECK_LE (indices.size(), num_axes());
@@ -272,7 +272,7 @@ namespace caffe
             Dtype* mutable_cpu_diff();
             Dtype* mutable_gpu_diff();
             void Update();
-			//从caffe.proto中定义的blob格式转化为blob.hpp中定义的blob格式
+            //从caffe.proto中定义的blob格式转化为blob.hpp中定义的blob格式
             void FromProto (const BlobProto& proto, bool reshape = true);
             void ToProto (BlobProto* proto, bool write_diff = false) const;
             
@@ -315,7 +315,7 @@ namespace caffe
             shared_ptr<SyncedMemory> data_;
             shared_ptr<SyncedMemory> diff_;
             shared_ptr<SyncedMemory> shape_data_;
-			//四个元素，number N x channel K x height H x width W.
+            //四个元素，number N x channel K x height H x width W.
             vector<int> shape_;
             int count_;
             int capacity_;

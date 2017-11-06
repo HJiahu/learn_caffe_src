@@ -26,6 +26,7 @@ namespace caffe
     {
         public:
             explicit Net (const NetParameter& param);
+            //枚举类型 phase 只有train和test两种选择
             explicit Net (const string& param_file, Phase phase,
                           const int level = 0, const vector<string>* stages = NULL);
             virtual ~Net() {}

@@ -15,18 +15,18 @@ caffe源码阅读杂记
 #### Caffe中几个主要的类
 *	Solver: 网络求解类，一般使用的方法是梯度下降法
 *	Net: 描述网络的结构
-*	Layer: BLOB处理方式的封装，不同layer对data进行不同的运算，如卷积、池化、全连接等
-*	Blob: 数据的保存与传递都使用当前类
+*	Layer: 数据处理方式的封装，不同layer对data进行不同的运算，如卷积、池化、全连接等
+*	Blob: 数据的保存与传递都使用的类
 
 #### 读caffe.proto
 *	caffe.proto中定义了很多数据，具体内容参考caffe.proto中的定义，文件中描述的很详细
 ##### [google/protobuf][12] 简介
-*	可以认为protobuf是一个数据[持久化与序列化][4]的工具，具体教程参考[1][1]、[2][2]、[官方C++版教程][3]、[C++国内复制版][14]，在caffe中主要用protobuf实现网络模型的结构定义、存储和读取。
-*	存储和交换正是 Protobuf 最有效的应用领域
+*	protobuf是一个数据[持久化与序列化][4]的工具，具体教程参考[1][1]、[2][2]、[官方C++版教程][3]（[C++国内复制版][14]），在caffe中主要用protobuf实现网络模型的结构定义、存储和读取。
+*	**数据存储和交换**（包括通过网络交换数据）正是 Protobuf 最有效的应用领域
 *	使用流程如下：
 	*	首先我们需要编写一个 proto 文件，定义我们程序中需要处理的结构化数据，在 protobuf 的术语中，结构化数据被称为 Message；
 	*	写好 proto 文件之后就可以用 Protobuf 编译器将该文件编译成目标语言了，对于C++而言就是生成一个hpp和cpp文件；
-	*	在生成的头文件中，有一个 C++ 类，使用这个类可以对消息进行操作。诸如对消息的成员进行赋值，将消息序列化等等都有相应的方法。
+	*	在生成的头文件中，有一个 C++ 类，使用这个类可以对消息进行操作。诸如对消息的成员进行赋值，将消息序列化、反序列化等等。
 
 *	proto [格式示例与解释][13]
 
@@ -36,12 +36,17 @@ caffe源码阅读杂记
 		package tutorial;
 		
 		//结构化数据被称为 Message
+		//在hpp文件中会生成如下类和结构：
+		//enum Person_PhoneType;
+		//class Person_PhoneNumber : public ::google::protobuf::Message;
+		//class Person :public ::google::protobuf::Message;
+		//class AddressBook : public ::google::protobuf::Message;
 		message Person {
 		  
-		  // 字段格式：限定修饰符① | 数据类型② | 字段名称③ | = | 字段编码值④ | [字段默认值⑤]
+		  // 字段（类成员）定义格式：限定修饰符① | 数据类型② | 字段名称③ | = | 字段编码值④ | [字段默认值⑤]
           // 每一个变量前都需要使用下面三个词进行修饰：required、optional、repeated
-		  // required表示是一个必须字段，必须相对于发送方，在发送消息之前必须设置该字段的值，
-		  // 对于接收方，必须能够识别该字段的意思。
+		  // required表示是一个必须字段，必须相对于发送方（对应于数据的序列化方），在发送消息之前必须设置该字段的值，
+		  // 对于接收方（对应于数据的反序列化方），必须能够识别该字段的意思。
 		  // 发送之前没有设置required字段或者无法识别required字段都会引发编解码异常，导致消息被丢弃。
 		  required string name = 1;
 
@@ -76,7 +81,7 @@ caffe源码阅读杂记
 		  repeated Person people = 1;
 		}
 
-*	The Protocol Buffer API
+*	The Protocol Buffer API（通过 Protobuf 编译器编译上面的proto文件所获得的）
 
 		// name
 		inline bool has_name() const;//判断信息中是否包含当前元素
@@ -88,7 +93,7 @@ caffe源码阅读杂记
 		
 		...
 
-*	Writing A Message & Reading A Message
+*	Writing A Message & Reading A Message（使用上面API的示例）
 	
 		//create Message 
 		cout << "Enter person ID number: ";
@@ -119,7 +124,7 @@ caffe源码阅读杂记
 		|------------------------img0-----------------------|...img1~imgN-1...|
 		|<------channel R-------> <-channel G-><-channel B->|..................
         |<row0--row2-...row(H-1)>...........................|..................
-        |对应的R、或G、或B的值
+        |对应的R、或G、或B的值......
 *	blob类的成员如下（部分）
 	
 		void Reshape (const vector<int>& shape);
@@ -137,7 +142,7 @@ caffe源码阅读杂记
 	*	Backward: 通过顶层(top)给出的数据计算梯度并传递给底层(bottom)。 A layer with parameters computes the gradient w.r.t. to its parameters and stores it internally.
 *	forward和backward函数有对应的CPU与GPU版，如果没有定义GPU版函数，则退化使用CPU函数
 ##### LayerParameter
-*	LayerParameter中定义了如下参数（这里只有部分）
+*	LayerParameter中定义了如下参数（这里只有部分，具体可参考caffe.proto文件）
 
 		optional string name; // the layer name
 		optional string type; // the layer type

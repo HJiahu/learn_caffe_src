@@ -20,10 +20,10 @@ caffe源码阅读杂记
 *	Blob: 数据的保存与传递都使用的类
 
 #### 读caffe.proto
-*	caffe.proto中定义了很多数据，具体内容参考caffe.proto中的定义，文件中描述的很详细
+*	caffe.proto中定义了很多数据结构（这些结构都会转化为对应C++类），具体内容参考caffe.proto中的定义，文件中描述的很详细
 ##### [google/protobuf][12] 简介
-*	protobuf是一个数据[持久化与序列化][4]的工具，具体教程参考[1][1]、[2][2]、[官方C++版教程][3]（[C++国内复制版][14]）。
-*	**数据存储和交换**（包括通过网络交换数据） 是 Protobuf 最有效的应用领域。caffe中主要用protobuf实现网络模型的结构定义、存储和读取。
+*	protobuf是一个数据[持久化与序列化][4]的工具，具体教程参考[1][1]、[2][2]、[官方C++版教程][3]（[C++国免翻墙制版][14]）。
+*	**数据存储和交换**（包括通过网络交换数据） 是 Protobuf 最有效的应用领域。caffe中主要用protobuf实现网络模型的结构定义、存储和读取（网络结构映射到内存中就是对应对象之间的结构，对象初始化时需要参数。caffe使用protobuf定义内存中对象的结构并保存相应的数据，protobuf将管理这些参数在文件与内存中的映射关系）。
 *	使用流程如下：
 	*	首先我们需要编写一个 proto 文件，定义我们程序中需要处理的结构化数据，在 protobuf 的术语中，结构化数据被称为 Message；
 	*	写好 proto 文件之后就可以用 Protobuf 编译器将该文件编译成目标语言了，对于C++而言就是生成一个hpp和cpp文件；
@@ -68,10 +68,10 @@ caffe源码阅读杂记
 		void* mutable_gpu_data();
 
 #### layer.hpp
-*	layer是caffe中网络的基础，是计算单元：卷积、池化、內积、sigmoid等神经元运算都在layer中完成。而且caffe中的layer不但实现前向运算，同时也可以实现反向运算，即检测与训练运算都包含在同一个层中。
+*	layer是caffe中网络的基础，是基本的计算单元。卷积、池化、內积、sigmoid等神经元运算都在layer中完成。而且caffe中的layer不但实现前向运算，同时也可以实现反向运算，即检测与训练运算都包含在同一个层中。
 *	caffe中所有的层都直接或间接继承于layer这个类
 *	每一层的layer从底层连接获得输入数据，计算之后通过顶层连接输出计算结果。
-*	每一层layer都必须实现3个关键函数：setup, forward, and backward
+*	每一层layer都必须实现3个关键函数：setup、forward、backward
 	*	Setup: 在初始化模型的的时候初始化层的参数和连接
 	*	Forward: 通过底层（bottom）给出的数据计算结果并传递给顶层（top）
 	*	Backward: 通过顶层(top)给出的数据计算梯度并传递给底层(bottom)。 A layer with parameters computes the gradient w.r.t. to its parameters and stores it internally.

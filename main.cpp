@@ -12,12 +12,12 @@ void show_predict (const float *output);
 
 int main (int argc, char* argv[])
 {
-    ::google::InitGoogleLogging (argv[0]); //不显示网络的载入过程
+    ::google::InitGoogleLogging (argv[0]); //不在终端显示网络的载入过程
     cout << "init ......" << endl;
     //网络结构文件
     const string lenet_prototxt_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet.prototxt)");
     //训练好的网络模型
-    const string lenet_model_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet.caffemodel)");
+    const string lenet_model_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet_iter_1000.caffemodel)");
     typedef float type;
     //生成用于测试的图片
     auto data = generate_test_img (-1, true);

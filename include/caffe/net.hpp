@@ -27,6 +27,8 @@ namespace caffe
         public:
             explicit Net (const NetParameter& param);
             //枚举类型 phase 只有train和test两种选择
+            //因为Net同时用于训练与测试，所以需要phase变量来指定网络的用处（有些网络中含有只在训练时才使用的层，如accuracy）
+            //后两个参数的意义还不了解
             explicit Net (const string& param_file, Phase phase,
                           const int level = 0, const vector<string>* stages = NULL);
             virtual ~Net() {}
@@ -359,8 +361,8 @@ namespace caffe
             size_t memory_used_;
             /// Whether to compute and display debug info for the net.
             bool debug_info_;
-            // Callbacks
-            vector<Callback*> before_forward_;
+            // Callbacks，
+            vector<Callback*> before_forward_;// 在执行前向传输前对数据进行的处理，可以有多个
             vector<Callback*> after_forward_;
             vector<Callback*> before_backward_;
             vector<Callback*> after_backward_;

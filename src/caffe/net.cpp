@@ -1039,8 +1039,7 @@ namespace caffe
     }
     
     template <typename Dtype>
-    void Net<Dtype>::CopyTrainedLayersFromBinaryProto (
-        const string trained_filename)
+    void Net<Dtype>::CopyTrainedLayersFromBinaryProto (const string trained_filename)
     {
         NetParameter param;
         ReadNetParamsFromBinaryFileOrDie (trained_filename, &param);

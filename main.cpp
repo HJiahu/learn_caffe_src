@@ -5,6 +5,7 @@
 #include <string>
 using namespace caffe;
 using namespace std;
+
 //如果num<0则随机生成0-9的图，返回的Mat元素是浮点数
 //白色的背景黑色的数值，如果show_img为true则显示生成的图片
 std::pair<int, std::shared_ptr<float> > generate_test_img (int num = -1, bool show_img = false);
@@ -16,22 +17,23 @@ int main (int argc, char* argv[])
     cout << "init ......" << endl;
     //网络结构文件
     const string lenet_prototxt_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet.prototxt)");
-    //训练好的网络模型
+    //训练好的网络模型，这个模型的准确度不高，6和7都会被误检
     const string lenet_model_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet_iter_1000.caffemodel)");
     typedef float type;
-    //生成用于测试的图片
-    auto data = generate_test_img (-1, true);
+    //生成用于测试的图片，默认图像的大小为28*28（灰度图）
+    auto data = generate_test_img (6, true);
     //初始化caffe
     //set cpu running software
     Caffe::set_mode (Caffe::CPU);
     //load net file	, caffe::TEST 用于测试时使用
     Net<type> lenet (lenet_prototxt_path, caffe::TEST);
     //load net train file caffemodel
+    //因为caffe使用protobuf实现数据的持久化所以网络结构文件与model文件时一一对应的
     lenet.CopyTrainedLayersFrom (lenet_model_path);
     Blob<type> *input_ptr = lenet.input_blobs() [0];
     input_ptr->Reshape (1, 1, 28, 28);
     Blob<type> *output_ptr = lenet.output_blobs() [0];
-    output_ptr->Reshape (1, 10, 1, 1);
+    //output_ptr->Reshape (1, 10, 1, 1);
     //copy data from <ary> to <input_ptr>
     input_ptr->set_cpu_data (data.second.get());
     cout << "test num is :" << data.first << endl;
@@ -82,7 +84,7 @@ std::pair<int, std::shared_ptr<float> > generate_test_img (int num, bool show_im
     
     else
     {
-        test_num[0] = static_cast<char> (num);
+        test_num[0] = static_cast<char> ('0' + num);
     }
     
     std::shared_ptr<float> data_ptr (new float[28 * 28]);

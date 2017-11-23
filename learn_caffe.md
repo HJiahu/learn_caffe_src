@@ -13,6 +13,8 @@ caffe源码阅读杂记
 *	参考官方的[文档][5]，先了解某个模块的作用
 *	为了简化学习，先不考虑任何与GPU相关的问题
 ### 我的阅读过程
+#### 大致的过程
+*	读caffe前对深度学习没有什么概念所以先通读了上面参考网页中的第一个并详细阅读了其中的network1代码
 #### Caffe中几个主要的类
 *	Solver: 网络求解类，一般使用的方法是梯度下降法
 *	Net: 描述网络的结构
@@ -97,7 +99,13 @@ caffe源码阅读杂记
 			//Writes the layer parameter to a protocol buffer
 			virtual void ToProto (...);
 			
-
+#### net.hpp
+*	net类中的成员
+	*	数据成员（通过读caffe.proto中的NetParameter定义获得）
+		
+			string name; //网络的名称
+			LayerParameter layer; //保存层的信息
+  
 
 ##### LayerParameter
 *	LayerParameter中定义了如下参数（这里只有部分，具体可参考caffe.proto文件）

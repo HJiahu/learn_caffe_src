@@ -76,14 +76,14 @@ namespace caffe
             void SetUp (const vector<Blob<Dtype>*>& bottom,
                         const vector<Blob<Dtype>*>& top)
             {
-                //测试数据结构是否正确
+                // 测试数据结构是否正确
                 CheckBlobCounts (bottom, top);
-                //这个函数需要被重写以应对不同的层
+                // 这个函数需要被重写以应对不同的层，每一层在创建的时候都有自己的权值和偏置
+				// 当前函数的意义在于初始化这些权值和偏置
                 LayerSetUp (bottom, top);
                 //
                 Reshape (bottom, top);
-                //在刚开始读代码时可以不必理解下面函数的作用，因为其设计到loss值，在后面会遇到
-                //这个函数很可能用于训练，从top层获得当前层的损失值，从而实现反向传输算法
+                //设置与损失函数相关的层的重要程度，参考函数的注释
                 SetLossWeights (top);
             }
             
@@ -427,6 +427,7 @@ namespace caffe
              * Called by SetUp to initialize the weights associated with any top blobs in
              * the loss function. Store non-zero loss weights in the diff blob.
              */
+			//一个网络可能由多个层同时产生损失函数值但它们的重要性不同，当前函数的目的在于设置对应的权重
             inline void SetLossWeights (const vector<Blob<Dtype>*>& top)
             {
                 const int num_loss_weights = layer_param_.loss_weight_size();

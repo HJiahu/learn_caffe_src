@@ -1,5 +1,6 @@
 caffe源码阅读杂记
 =====================================================
+
 ### 准备
 *	一些参考网页
 	*	[Neural Networks and Deep Learning][7]
@@ -9,33 +10,41 @@ caffe源码阅读杂记
 	*	[Caffe源码解析][15]
 	*	[caffe源码结构][16]
 	*	[官方代码结构doxygen][17]
+	*	[官方Caffe Tutorial][5]
 *	以C++源码形式配置debug&CPU版的caffe，便于阅读源码与单步调试【[参考][8]】
 *	参考官方的[文档][5]，先了解某个模块的作用
 *	为了简化学习，先不考虑任何与GPU相关的问题
+*	我在读代码的过程中在代码中添加了一些自己的注释，代码保存在[github][19]上
+
+
 ### 我的阅读过程
 #### 大致的过程
-*	读caffe前对深度学习没有什么概念所以先通读了上面参考网页中的第一个并详细阅读了其中的network1代码
+*	读caffe前对深度学习没有什么概念所以先通读了上面参考网页中的第一个并详细阅读了其中的network1代码，阅读过程在[这里][18]
+
 #### Caffe中几个主要的类
+*	Blob: 数据的保存与传递都使用的类(神经网络中主要的参数就是神经元之间的权值与偏置值，其均使用Blob对象保存与交互)
+*	Layer: Blob数据处理方式的封装，不同layer对Blob data进行不同的运算，如卷积、池化、全连接等
+*	Net: 描述网络的结构，Net中以指定的结构保存不同的Layer
 *	Solver: 网络求解类，一般使用的方法是梯度下降法
-*	Net: 描述网络的结构
-*	Layer: 数据处理方式的封装，不同layer对data进行不同的运算，如卷积、池化、全连接等
-*	Blob: 数据的保存与传递都使用的类
 
 #### 读caffe.proto
-*	caffe.proto中定义了很多数据结构（这些结构都会转化为对应C++类），具体内容参考caffe.proto中的定义，文件中描述的很详细
 ##### [google/protobuf][12] 简介
 *	protobuf是一个数据[持久化与序列化][4]的工具，具体教程参考[1][1]、[2][2]、[官方C++版教程][3]（[C++教程国内免翻墙版][14]）。
-*	**数据存储和交换**（包括通过网络交换数据） 是 Protobuf 最有效的应用领域。caffe中主要用protobuf实现网络模型的结构定义、存储和读取（网络结构映射到内存中就是对应对象之间的结构，对象初始化时需要参数。caffe使用protobuf定义内存中对象的结构并保存相应的数据，protobuf将管理这些参数在文件与内存中的映射关系）。
+*	**数据存储和交换**（包括通过网络交换数据） 是 Protobuf 最有效的应用领域。caffe中主要用protobuf实现网络模型的结构定义、存储和读取（网络结构映射到内存中就是对应对象之间的结构，对象初始化时需要参数。caffe使用protobuf定义内存中对象的结构并保存相应的数据，protobuf将管理这些参数在文件与内存中的映射关系，例如我们使用caffe框架是一般需要网络文件与对应的训练好的模型文件，他们是一一对应的，模型文件中保存了网络对象中的参数）。
 *	使用流程如下：
 	*	首先我们需要编写一个 proto 文件，定义我们程序中需要处理的结构化数据，在 protobuf 的术语中，结构化数据被称为 Message；
 	*	写好 proto 文件之后就可以用 Protobuf 编译器将该文件编译成目标语言了，对于C++而言就是生成一个hpp和cpp文件；
 	*	在生成的头文件中，有一个 C++ 类，使用这个类可以对消息进行操作。诸如对消息的成员进行赋值，将消息序列化、反序列化等等。
 *	[proto格式说明](#proto)(见本文下方)
 
+
+##### caffe.proto
+*	caffe.proto中定义了很多数据结构（这些结构都会转化为对应C++类并在caffe代码中使用），数据结构的具体内容参考caffe.proto中的定义
+
 ### blob、layer、net、solver的大致结构
 #### blob.hpp
-*	blob类用来保存学习到的参数以及网络传输过程中产生的数据，bolb是caffe在内存中数据交换的核心
-*	一层一层往下分BLOB的基本元素分别为：图像->通道->行->列（这里已经是最小的元素了，其类型就是DType，常见的如float、double）。`( (n * channels() + c) * height() + h) * width() + w;`表示的是元素(n,c,h,w)在blob中的索引。
+*	blob类用来保存学习到的参数以及网络传输过程中产生的数据，bolb是caffe数据保存与交换的核心
+*	一层一层往下分BLOB的基本元素分别为：图像->通道->行->列（这里已经是最小的元素了，其类型就是DType，常见的有float和double）。`( (n * channels() + c) * height() + h) * width() + w;`表示的是元素(n,c,h,w)在blob中的索引。
 	*	`n*channels()+c `表示的是当前元素所处的通道的索引
 	*	`((n * channels() + c) * height() + h)`  当前元素所处的行所在的索引
 	*	最后求的就是当前元素的索引了
@@ -70,7 +79,7 @@ caffe源码阅读杂记
 		void* mutable_gpu_data();
 
 #### layer.hpp
-*	layer是caffe中网络的基础，是基本的计算单元。卷积、池化、內积、sigmoid等神经元运算都在layer中完成。而且caffe中的layer不但实现前向运算，同时也可以实现反向运算，即检测与训练运算都包含在同一个层中。
+*	layer是caffe中网络的基础，是基本的计算单元与连接单元。卷积、池化、內积、sigmoid等神经元运算都在layer中完成。caffe中的layer不但实现前向运算，同时也实现反向运算，即检测与训练运算都包含在同一个层中。
 *	caffe中所有的层都直接或间接继承于layer这个类
 *	每一层的layer从底层连接获得输入数据，计算之后通过顶层连接输出计算结果。
 *	每一层layer都必须实现3个关键函数：setup、forward、backward
@@ -79,11 +88,13 @@ caffe源码阅读杂记
 	*	Backward: 通过顶层(top)给出的数据计算梯度并传递给底层(bottom)。 A layer with parameters computes the gradient w.r.t. to its parameters and stores it internally.
 *	forward和backward函数有对应的CPU与GPU版，如果没有定义GPU版函数，则退化使用CPU函数
 *	layer类中的成员有
+	*	LayerParameter是个大杂烩，每个层需要的参数都在其中有定义，只不过对于某个层不用的参数，LayerParameter中只保存其默认值（在调试的时候通过查看type_来确定层的类型）
 	*	数据成员
-
-			LayerParameter layer_param_;//当前层的参数，
-			Phase phase_;//用于测试还是训练
-			vector<shared_ptr<Blob<Dtype> > > blobs_;//指向需要训练的参数
+			
+			//当前层的参数，LayerParameter的结构定义在caffe.proto中
+			LayerParameter layer_param_;
+			Phase phase_;//用于测试还是训练，有些层只能用于测试，而有些是测试训练均可
+			vector<shared_ptr<Blob<Dtype> > > blobs_;//指向需要训练的参数（w和b）
 			/** Vector indicating whether to compute the diff of each param blob. */
 			vector<bool> param_propagate_down_;
 			
@@ -98,15 +109,127 @@ caffe源码阅读杂记
 			vector<shared_ptr<Blob<Dtype> > >& blobs();
 			//Writes the layer parameter to a protocol buffer
 			virtual void ToProto (...);
-			
+
 #### net.hpp
+*	net类定义了网络的结构，即各个层(layers)之间的组合（连接）方式。网络的结构在caffe中是定义在prototxt文件中的，下面以lenet网络的部分结构为例来说明（caffe中的网络层可以并列，下面使用deepid网络为例来说明）
+	
+		name: "LeNet"#网络结构的名称
+		layer {
+		  name: "data" #当前层的名称
+		  type: "Input"#当前层的类型
+		  top: "data"  #输出层的名称，一般每个layer都有输入与输出两个“子层”，Input层比较特殊，不用写bottom
+		  input_param { shape: { dim: 64 dim: 1 dim: 28 dim: 28 } } #当前层的参数
+		}
+		layer {
+		  name: "conv1"
+		  type: "Convolution"
+		  bottom: "data" #指明当前层将从“data”层获得输入数据
+		  top: "conv1"   #指明输出层的名称，一般与当前层的名称相同
+		  param {...     #因为篇幅，具体参数这里忽略
+		}
+
+		###################################################################
+		# 以deepid网络为例，caffe中的层可以连接多个层也可以将多个层合并为一个输出
+		...
+		layer {
+		  name: "pool3"
+		  ...
+		}
+		# 下面两层的输入都取自pool3，且这两层的类别也不同
+		layer {
+		  name: "deepid_match_conv"
+		  type: "Pooling"
+		  bottom: "pool3" # 从pool3中获得输入数据
+		  ...
+		}
+		layer {
+		  name: "conv4"
+		  type: "Convolution"
+		  bottom: "pool3" # 从pool3中获得输入数据
+		  ...
+		}
+		...
+		layer {
+		  name: "pool4"
+		  type:  "Pooling"
+		  bottom: "norm4"
+		  top: "pool4"
+		  ...
+		}
+		# 下面这一层的输入数据来自于两个层：pool4和上面的deepid_match_conv，并只有一个输出
+		layer {
+		  name: "deepid_concat"
+		  type: "Concat"
+		  bottom: "deepid_match_conv"
+		  bottom: "pool4"
+		  top: "deepid_concat"
+		}
+		...
+
 *	net类中的成员
-	*	数据成员（通过读caffe.proto中的NetParameter定义获得）
+	*	数据成员
 		
 			string name; //网络的名称
-			LayerParameter layer; //保存层的信息
-  
+			//各个层的信息
+			vector<shared_ptr<Layer<Dtype> > > layers_;
+			vector<string> layer_names_;
+            map<string, int> layer_names_index_;
+			//保存层层之间交互的信息
+            vector<shared_ptr<Blob<Dtype> > > blobs_;
+            vector<string> blob_names_;
+            map<string, int> blob_names_index_;
 
+	*	函数成员
+		
+			//前向传输，前向传输还有其他形式的函数如：ForwardFromTo、ForwardFrom等
+			const vector<Blob<Dtype>*>& Forward (Dtype* loss = NULL);
+			//有前向亦有反向传播函数
+			void Backward();//  void BackwardFrom (int start);等形式
+			//前向传输后进行反向传播并返回前向传输时的损失函数输出
+			Dtype ForwardBackward();
+			//设置层数据的函数
+			void CopyTrainedLayersFrom (const NetParameter& param);//亦有其他形式
+			//其他形式的help函数，例如ToHDF5、ToProto等
+
+#### solver.hpp
+*	solver用于训练网络（优化权值和偏置值使得损失函数的输出最小）。caffe中实现了以下几种算法用于网络的训练【[参考][20]】
+	*	Stochastic Gradient Descent (type: "SGD"),
+	*	AdaDelta (type: "AdaDelta"),
+	*	Adaptive Gradient (type: "AdaGrad"),
+	*	Adam (type: "Adam"),
+	*	Nesterov’s Accelerated Gradient (type: "Nesterov") and
+	*	RMSprop (type: "RMSProp")
+*	SolverParameter类中的数据成员（读caffe.proto）有很多，大部分都是关于训练方法参数设置的，例如网络结构文件、学习率、迭代次数等
+*	solver.hpp只是所有solver的父类，具体的solver在其他文件中
+*	以lenet网络的训练solver为例说明solver需要的参数（并发全部）
+
+		net: "./lenet_train_test.prototxt" #网络结构文件
+		#指明测试时前向传输的次数（每次batch size个样本）
+		#平均这些结果即为网络的当前对test数据集的精度
+		test_iter: 100 
+		test_interval: 100 # 指明进行多少次训练后进行测试
+		
+		base_lr: 0.01 #基本的学习率
+		momentum: 0.9 #加速训练的一个参数
+		weight_decay: 0.0005 #目的是正则化，降低过拟合的风险
+		
+		# 学习率更新的策略，一般在整个训练过程中学习率是会变化的
+		lr_policy: "inv"
+		gamma: 0.0001
+		power: 0.75
+		
+		# 训练多少次显示一次信息
+		# 信息中包括迭代次数、时间、当前网络对测试集与训练集的损失函数输出 
+		display: 100 
+		
+		max_iter: 1000 #最大的训练次数，达到这个次数时caffe会停止训练并保存模型
+		
+		snapshot: 500 #多久保存一次当前训练模型的快照，caffe可以从指定的快照处开始训练
+		snapshot_prefix: "./snapshot/lenet" # 快照文件保存的位置
+		
+		solver_mode: GPU #设置solver运行的模式GPU or CPU
+
+### 典型layer代码阅读
 ##### LayerParameter
 *	LayerParameter中定义了如下参数（这里只有部分，具体可参考caffe.proto文件）
 
@@ -264,3 +387,6 @@ caffe源码阅读杂记
 [15]:http://www.cnblogs.com/louyihang-loves-baiyan/p/5149628.html
 [16]:https://www.leiphone.com/news/201612/oZUj5d437bpSl5wc.html
 [17]:http://caffe.berkeleyvision.org/doxygen/
+[18]:http://www.cnblogs.com/jiahu-Blog/p/7847043.html
+[19]:https://github.com/HJiahu/learn_caffe_src
+[20]:http://caffe.berkeleyvision.org/tutorial/solver.html

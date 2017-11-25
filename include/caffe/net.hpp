@@ -27,7 +27,7 @@ namespace caffe
         public:
             explicit Net (const NetParameter& param);
             //枚举类型 phase 只有train和test两种选择
-            //因为Net同时用于训练与测试，所以需要phase变量来指定网络的用处（有些网络中含有只在训练时才使用的层，如accuracy）
+            //因为Net类同时用于训练与测试，所以需要phase变量来指定网络的用处（有些网络中含有只在训练时才使用的层，如accuracy）
             //后两个参数的意义还不了解
             explicit Net (const string& param_file, Phase phase,
                           const int level = 0, const vector<string>* stages = NULL);

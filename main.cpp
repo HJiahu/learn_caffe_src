@@ -9,6 +9,7 @@
 ////如果num<0则随机生成0-9的图，返回的Mat元素是浮点数
 ////白色的背景黑色的数值，如果show_img为true则显示生成的图片
 //std::pair<int, std::shared_ptr<float> > generate_test_img (int num = -1, bool show_img = false);
+////在控制台显示caffe的预测结果
 //void show_predict (const float *output);
 //
 //
@@ -19,10 +20,10 @@
 //    //网络结构文件
 //    const string lenet_prototxt_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet.prototxt)");
 //    //训练好的网络模型，这个模型的准确度不高，6和7都会被误检
-//    const string lenet_model_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet_iter_1000.caffemodel)");
+//    const string lenet_model_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet_iter_20000.caffemodel)");
 //    typedef float type;
 //    //生成用于测试的图片，默认图像的大小为28*28（灰度图）
-//    auto data = generate_test_img (6, true);
+//    auto data = generate_test_img (7, true);
 //    //初始化caffe
 //    //set cpu running software
 //    Caffe::set_mode (Caffe::CPU);
@@ -92,7 +93,8 @@
 //    std::shared_ptr<float> data_ptr (new float[28 * 28]);
 //    //在28*28的图片颜色为RGB(255,255,255)背景上写RGB(0,0,0)数字.
 //    cv::Mat gray (28, 28, CV_8UC1, cv::Scalar (255));
-//    cv::putText (gray, (char*) &test_num, cv::Point (4, 22), 5, 1.4, cv::Scalar (0), 2);
+//    //如果把参数thickness改为2（即使得字体的笔画变粗）则预测结果误差比较大，6，9，都会被误检
+//    cv::putText (gray, (char*) &test_num, cv::Point (4, 22), 5, 1.4, cv::Scalar (0), 1);
 //    
 //    //将图像的数值从uchar[0,255]转换成float[0.0f,1.0f],的数, 且颜色取相反的 .
 //    for (int i = 0; i < 28 * 28; i++)

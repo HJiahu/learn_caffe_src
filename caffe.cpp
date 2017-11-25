@@ -10,7 +10,6 @@
 #include <map>
 #include <string>
 #include <vector>
-
 #include "boost/algorithm/string.hpp"
 #include "caffe/caffe.hpp"
 #include "caffe/util/signal_handler.h"
@@ -26,8 +25,9 @@ using caffe::Timer;
 using caffe::vector;
 using std::ostringstream;
 
-// 下面定义可用的参数，例如我们使用caffe进行训练时使用的指令为：
-// caffe train --solver=./*.solver -gpu 0，可使用参数solver和gpu等就是在下面定义
+// 下面定义可执行文件在执行时可用的参数，例如我们使用caffe进行训练时使用的指令为：
+// caffe train -solver ./*solver.prototxt -gpu 0，可使用参数solver和gpu等就是在下面定义
+// 在可执行文件执行时时，可以使用指定的变量提取这些参数，例如gup参数值可以通过全局变量FLAGS_gpu获得
 DEFINE_string (gpu, "",
                "Optional; run in GPU mode on given device IDs separated by ','."
                "Use '-gpu all' to run on all available GPUs. The effective training "
@@ -59,18 +59,19 @@ BrewMap g_brew_map;
 //编译器将为匿名名字空间生成唯一的名称xx并自动添加一条指令：using xx;
 //编译器将把生成的名字空间名字添加到匿名空间中的变量签名中，
 //这样在其他文件中就无法链接这些变量，与static效果相同（来保证生成的符号是局部的）
-//主要原因是名字xx是随机且唯一的所以外界难以连接并不是说不可能，还有static不能修饰class，而匿名空间可以
+//主要原因是名字xx是随机且唯一的所以外界难以连接并不是说不能，还有static不能修饰class，而匿名空间可以
 #define RegisterBrewFunction(func) \
 namespace { \
-class __Registerer_##func { \
+class __Registerer_##func { /*利用构造函数将函数指针写进全局变量g_brew_map中*/\
  public: /* NOLINT */ \
   __Registerer_##func() { \
     g_brew_map[#func] = &func; \
   } \
 }; \
-__Registerer_##func g_registerer_##func; \
+__Registerer_##func g_registerer_##func; /*定义对象，自动调用构造函数*/\
 }
 
+//从g_brew_map中提取指定的函数指针
 static BrewFunction GetBrewFunction (const caffe::string& name)
 {
     if (g_brew_map.count (name))
@@ -93,6 +94,7 @@ static BrewFunction GetBrewFunction (const caffe::string& name)
     }
 }
 
+//设置使用的GPUs，可以指定某个（若gpu 0）或所有
 // Parse GPU ids or use all available devices
 static void get_gpus (vector<int>* gpus)
 {
@@ -102,7 +104,7 @@ static void get_gpus (vector<int>* gpus)
 #ifndef CPU_ONLY
         CUDA_CHECK (cudaGetDeviceCount (&count));
 #else
-        NO_GPU;
+        NO_GPU;//#define NO_GPU LOG(FATAL) << "Cannot use GPU in CPU-only Caffe: check mode."
 #endif
         
         for (int i = 0; i < count; ++i)
@@ -129,6 +131,7 @@ static void get_gpus (vector<int>* gpus)
         }
 }
 
+// 从指令中提取caffe的运行phase
 // Parse phase from flags
 caffe::Phase get_phase_from_flags (caffe::Phase default_value)
 {
@@ -145,6 +148,7 @@ caffe::Phase get_phase_from_flags (caffe::Phase default_value)
     return caffe::TRAIN;  // Avoid warning
 }
 
+//不明白stage是什么
 // Parse stages from flags
 vector<string> get_stages_from_flags()
 {
@@ -153,12 +157,15 @@ vector<string> get_stages_from_flags()
     return stages;
 }
 
+//具体指令的实现如：train、test等
 // caffe commands to call by
 //     caffe <command> <args>
 //
 // To add a command, define a function "int command()" and register it with
 // RegisterBrewFunction(action);
 
+//显示指定gpu的一些信息，例如：caffe device_query -gpu 0
+//将显示gpu 0的一些信息，例如内存大小、共享内存大小等
 // Device Query: show diagnostic information for a GPU device.
 int device_query()
 {
@@ -197,8 +204,7 @@ void CopyLayers (caffe::Solver<float>* solver, const std::string& model_list)
 
 // Translate the signal effect the user specified on the command-line to the
 // corresponding enumeration.
-caffe::SolverAction::Enum GetRequestedAction (
-    const std::string& flag_value)
+caffe::SolverAction::Enum GetRequestedAction (const std::string& flag_value)
 {
     if (flag_value == "stop")
     {
@@ -219,14 +225,17 @@ caffe::SolverAction::Enum GetRequestedAction (
     return caffe::SolverAction::NONE;
 }
 
+/***********************************************  train  *************************************************/
 // Train / Finetune a model.
 int train()
 {
+    //训练的时候必须提供一个solver
     CHECK_GT (FLAGS_solver.size(), 0) << "Need a solver definition to train.";
+    //也可以提供一个已经训练好的model在其基础上进行训练
     CHECK (!FLAGS_snapshot.size() || !FLAGS_weights.size())
-            << "Give a snapshot to resume training or weights to finetune "
-            "but not both.";
+            << "Give a snapshot to resume training or weights to finetune but not both.";
     vector<string> stages = get_stages_from_flags();
+    //从solver文件中读取solver信息到指定的对象中
     caffe::SolverParameter solver_param;
     caffe::ReadSolverParamsFromTextFileOrDie (FLAGS_solver, &solver_param);
     solver_param.mutable_train_state()->set_level (FLAGS_level);
@@ -256,6 +265,8 @@ int train()
     
     vector<int> gpus;
     get_gpus (&gpus);
+    //use cpu
+    gpus.clear();
     
     if (gpus.size() == 0)
     {
@@ -536,6 +547,12 @@ RegisterBrewFunction (time);
 
 int main (int argc, char** argv)
 {
+    //修改argc和argv，在函数内部提供参数，便于调试
+    //指令形式：caffe train -solver ./*solver.prototxt
+    char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt";
+    char * (command_vec[]) = {"caffe", "train", "-solver", solver_file_path};
+    argc = 4;
+    argv = command_vec;
     // Print output to stderr (while still logging).
     FLAGS_alsologtostderr = 1;
     // Set version

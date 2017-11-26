@@ -46,7 +46,10 @@ namespace caffe
                 //设定layer是用于训练还是测试
                 phase_ = param.phase();
                 
-                //将模型中的blob转化为内存中便于训练的blob，就是blob.hpp中定义的blob的格式
+                // 将模型中的blob转化为内存中便于训练的blob，就是blob.hpp中定义的blob的格式
+                // 训练的时候如果从某个snapshot开始则会执行下面的if语句否则不会
+                // caffe.proto中定义的blob和blob.hpp中定义的blob的一个区别是后者使用了指针指向数据，前者数据即为成员
+                // 每一个层中都可能有多个blob，例如在训练时的data层，其就有两个blob：样本数据、样本标签
                 if (layer_param_.blobs_size() > 0)
                 {
                     blobs_.resize (layer_param_.blobs_size());

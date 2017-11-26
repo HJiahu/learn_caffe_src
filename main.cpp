@@ -76,7 +76,7 @@
 //{
 //    //生成用于测试的数据
 //    char test_num[2] = { 0 };
-//    
+//
 //    //如果num在1-9之内，则生成对应的值，否则随机生成1-9的数
 //    if (num < 0 || num > 9)
 //    {
@@ -84,31 +84,31 @@
 //        num = rand() % 10;
 //        test_num[0] = num + '0';
 //    }
-//    
+//
 //    else
 //    {
 //        test_num[0] = static_cast<char> ('0' + num);
 //    }
-//    
+//
 //    std::shared_ptr<float> data_ptr (new float[28 * 28]);
 //    //在28*28的图片颜色为RGB(255,255,255)背景上写RGB(0,0,0)数字.
 //    cv::Mat gray (28, 28, CV_8UC1, cv::Scalar (255));
 //    //如果把参数thickness改为2（即使得字体的笔画变粗）则预测结果误差比较大，6，9，都会被误检
 //    cv::putText (gray, (char*) &test_num, cv::Point (4, 22), 5, 1.4, cv::Scalar (0), 1);
-//    
+//
 //    //将图像的数值从uchar[0,255]转换成float[0.0f,1.0f],的数, 且颜色取相反的 .
 //    for (int i = 0; i < 28 * 28; i++)
 //    {
 //        // f_val =(255-uchar_val)/255.0f
 //        data_ptr.get() [i] = static_cast<float> (gray.data[i] ^ 0xFF) * 0.00390625;
 //    }
-//    
+//
 //    if (show_img)
 //    {
 //        cv::imshow ("test_num", gray);
 //        cv::waitKey (1);
 //    }
-//    
+//
 //    return make_pair (num, data_ptr);
 //}
 //
@@ -118,7 +118,7 @@
 //    cout << "\n\nPredicting Outcomes: " << endl;
 //    // get the maximum index
 //    int index = 0;
-//    
+//
 //    for (int i = 1; i < 10; i++)
 //    {
 //        if (output[index] < output[i])
@@ -126,13 +126,13 @@
 //            index = i;
 //        }
 //    }
-//    
+//
 //    // 打印这次预测[0,9]的每一个置信度
 //    for (int i = 0; i < 10; i++)
 //    {
 //        cout << i << "\t" << output[i] << endl;
 //    }
-//    
+//
 //    // 展示最后的预测结果
 //    cout << "res:\t" << index << "\t" << output[index] << endl;
 //}

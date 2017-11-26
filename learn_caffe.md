@@ -229,7 +229,7 @@ caffe源码阅读杂记
 		
 		solver_mode: GPU #设置solver运行的模式GPU or CPU
 
-### 典型layer代码阅读
+### 典型layer代码阅读(以caffe example中的lenet为例)
 ##### LayerParameter
 *	LayerParameter中定义了如下参数（这里只有部分，具体可参考caffe.proto文件）
 
@@ -253,7 +253,8 @@ caffe源码阅读杂记
 		optional BatchNormParameter batch_norm_param;
 		...
 
-##### input_layer（所有网络的第一层，以代码中的lenet为例）
+##### input_layer（type：Data）
+
 
 
 
@@ -300,8 +301,11 @@ caffe源码阅读杂记
 		  // 对于接收方，如果能够识别可选字段就进行相应的处理，如果无法识别，则忽略该字段，消息中的其它字段正常处理
 		  // 项目投入运营以后涉及到版本升级时的新增消息字段全部使用optional或者repeated，尽量不使用required
 		  // 如果使用了required，需要全网统一升级，如果使用optional或者repeated可以平滑升级
+
 		  optional string email = 3;
-		
+		  // Repeated：表示该字段可以包含0~N个元素。
+		  // 其特性和optional一样，但是每一次可以包含多个值。可以看作是在传递一个数组的值。
+		  repeat string phones;
 		  enum PhoneType {
 		    MOBILE = 0;
 		    HOME = 1;

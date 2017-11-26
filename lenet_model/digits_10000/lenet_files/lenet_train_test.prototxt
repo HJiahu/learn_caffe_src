@@ -1,8 +1,8 @@
-name: "LeNet"
+﻿name: "LeNet"
 layer {
   name: "mnist"
   type: "Data"
-  top: "data"
+  top: "data"   # 训练时Data层有两个blob，一个为样本数据一个为样本标签
   top: "label"
   include {
     phase: TRAIN

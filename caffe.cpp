@@ -547,12 +547,17 @@ RegisterBrewFunction (time);
 
 int main (int argc, char** argv)
 {
-    //修改argc和argv，在函数内部提供参数，便于调试
-    //指令形式：caffe train -solver ./*solver.prototxt
-    char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt";
-    char * (command_vec[]) = {"caffe", "train", "-solver", solver_file_path};
-    argc = 4;
-    argv = command_vec;
+    //至少在vs2015中调试代码时argc与argv依旧可用此时argc==1
+    if (argc == 1)
+    {
+        //修改argc和argv，在函数内部提供参数，便于调试
+        //指令形式：caffe train -solver ./*solver.prototxt
+        char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt";
+        char * (command_vec[]) = { "caffe", "train", "-solver", solver_file_path };
+        argc = 4;
+        argv = command_vec;
+    }
+    
     // Print output to stderr (while still logging).
     FLAGS_alsologtostderr = 1;
     // Set version

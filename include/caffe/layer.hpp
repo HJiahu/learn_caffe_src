@@ -76,6 +76,7 @@ namespace caffe
              * Sets up the loss weight multiplier blobs for any non-zero loss weights.
              * This method may not be overridden.
              */
+			//设置当前从层的输入数据来源和输出位置
             void SetUp (const vector<Blob<Dtype>*>& bottom,
                         const vector<Blob<Dtype>*>& top)
             {

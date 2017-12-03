@@ -33,16 +33,14 @@ namespace caffe
             output_labels_ = true;
         }
         
-        data_transformer_.reset (
-            new DataTransformer<Dtype> (transform_param_, this->phase_));
+        data_transformer_.reset (new DataTransformer<Dtype> (transform_param_, this->phase_));
         data_transformer_->InitRand();
         // The subclasses should setup the size of bottom and top
         DataLayerSetUp (bottom, top);
     }
     
     template <typename Dtype>
-    BasePrefetchingDataLayer<Dtype>::BasePrefetchingDataLayer (
-        const LayerParameter& param)
+    BasePrefetchingDataLayer<Dtype>::BasePrefetchingDataLayer (const LayerParameter& param)
         : BaseDataLayer<Dtype> (param),
           prefetch_ (param.data_param().prefetch()),
           prefetch_free_(), prefetch_full_(), prefetch_current_()
@@ -55,8 +53,7 @@ namespace caffe
     }
     
     template <typename Dtype>
-    void BasePrefetchingDataLayer<Dtype>::LayerSetUp (
-        const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
+    void BasePrefetchingDataLayer<Dtype>::LayerSetUp (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
         BaseDataLayer<Dtype>::LayerSetUp (bottom, top);
         

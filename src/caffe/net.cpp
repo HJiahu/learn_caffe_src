@@ -147,8 +147,7 @@ namespace caffe
             
             // After this layer is connected, set it up.
             layers_[layer_id]->SetUp (bottom_vecs_[layer_id], top_vecs_[layer_id]);
-            LOG_IF (INFO, Caffe::root_solver())
-                    << "Setting up " << layer_names_[layer_id];
+            LOG_IF (INFO, Caffe::root_solver()) << "Setting up " << layer_names_[layer_id];
                     
             for (int top_id = 0; top_id < top_vecs_[layer_id].size(); ++top_id)
             {

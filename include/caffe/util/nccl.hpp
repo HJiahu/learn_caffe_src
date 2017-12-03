@@ -13,23 +13,27 @@
     << ncclGetErrorString(result); \
 }
 
-namespace caffe {
+namespace caffe
+{
 
-namespace nccl {
-
-template <typename Dtype> class dataType;
-
-template<> class dataType<float> {
- public:
-  static const ncclDataType_t type = ncclFloat;
-};
-template<> class dataType<double> {
- public:
-  static const ncclDataType_t type = ncclDouble;
-};
-
-}  // namespace nccl
-
+    namespace nccl
+    {
+    
+        template <typename Dtype> class dataType;
+        
+        template<> class dataType<float>
+        {
+            public:
+                static const ncclDataType_t type = ncclFloat;
+        };
+        template<> class dataType<double>
+        {
+            public:
+                static const ncclDataType_t type = ncclDouble;
+        };
+        
+    }  // namespace nccl
+    
 }  // namespace caffe
 
 #endif  // end USE_NCCL

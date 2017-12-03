@@ -17,9 +17,11 @@ namespace caffe
         : BasePrefetchingDataLayer<Dtype> (param),
           offset_()
     {
+		//设置数据读取对象，不同格式的数据使用不同的对象读取，这里使用LMDB
         db_.reset (db::GetDB (param.data_param().backend()));
         db_->Open (param.data_param().source(), db::READ);
-        cursor_.reset (db_->NewCursor());
+        //类似于fseek，设置文件的游标
+		cursor_.reset (db_->NewCursor());
     }
     
     template <typename Dtype>

@@ -1,8 +1,9 @@
 #include "caffe/layers/parameter_layer.hpp"
 
-namespace caffe {
+namespace caffe
+{
 
-INSTANTIATE_CLASS(ParameterLayer);
-REGISTER_LAYER_CLASS(Parameter);
-
+    INSTANTIATE_CLASS (ParameterLayer);
+    REGISTER_LAYER_CLASS (Parameter);
+    
 }  // namespace caffe

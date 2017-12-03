@@ -1,8 +1,8 @@
-﻿name: "LeNet"
+name: "LeNet"
 layer {
   name: "mnist"
   type: "Data"
-  top: "data"   # 训练时Data层有两个blob，一个为样本数据一个为样本标签
+  top: "data"
   top: "label"
   include {
     phase: TRAIN
@@ -12,7 +12,7 @@ layer {
   }
   data_param {
     source: "I:/learn_caffe/learn_caffe/LMDB10000/train_7500_gray_lmdb"
-    batch_size: 10
+    batch_size: 64
     backend: LMDB
   }
 }
@@ -29,7 +29,7 @@ layer {
   }
   data_param {
     source: "I:/learn_caffe/learn_caffe/LMDB10000/test_2500_gray_lmdb"
-    batch_size: 10
+    batch_size: 100
     backend: LMDB
   }
 }

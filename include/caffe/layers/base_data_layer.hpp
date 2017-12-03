@@ -44,7 +44,7 @@ namespace caffe
             //当前变量的意义在于训练时是否对样本数据进行一些处理，例如crop img（图像修剪）
             TransformationParameter transform_param_;
             shared_ptr<DataTransformer<Dtype> > data_transformer_;
-            bool output_labels_;
+            bool output_labels_;//是否有标签
     };
     
     template <typename Dtype>
@@ -55,21 +55,17 @@ namespace caffe
     };
     
     template <typename Dtype>
-    class BasePrefetchingDataLayer :
-        public BaseDataLayer<Dtype>, public InternalThread
+    class BasePrefetchingDataLayer : public BaseDataLayer<Dtype>, public InternalThread
     {
         public:
             explicit BasePrefetchingDataLayer (const LayerParameter& param);
             // LayerSetUp: implements common data layer setup functionality, and calls
             // DataLayerSetUp to do special data layer setup for individual layer types.
             // This method may not be overridden.
-            void LayerSetUp (const vector<Blob<Dtype>*>& bottom,
-                             const vector<Blob<Dtype>*>& top);
-            virtual void Forward_cpu (const vector<Blob<Dtype>*>& bottom,
-                                      const vector<Blob<Dtype>*>& top);
-            virtual void Forward_gpu (const vector<Blob<Dtype>*>& bottom,
-                                      const vector<Blob<Dtype>*>& top);
-                                      
+            void LayerSetUp (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
+            virtual void Forward_cpu (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
+            virtual void Forward_gpu (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
+            
         protected:
             virtual void InternalThreadEntry();
             virtual void load_batch (Batch<Dtype>* batch) = 0;

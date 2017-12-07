@@ -7,7 +7,7 @@
 
 namespace caffe
 {
-
+	//将整形转化为字符串
     inline std::string format_int (int n, int numberOfLeadingZeros = 0)
     {
         std::ostringstream s;

@@ -14,8 +14,7 @@ namespace caffe
 
     template <typename Dtype>
     BaseDataLayer<Dtype>::BaseDataLayer (const LayerParameter& param)
-        : Layer<Dtype> (param),
-          transform_param_ (param.transform_param())
+        : Layer<Dtype> (param), transform_param_ (param.transform_param())
     {
     }
     
@@ -147,8 +146,7 @@ namespace caffe
     }
     
     template <typename Dtype>
-    void BasePrefetchingDataLayer<Dtype>::Forward_cpu (
-        const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
+    void BasePrefetchingDataLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
         if (prefetch_current_)
         {

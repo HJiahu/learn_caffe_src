@@ -47,7 +47,7 @@ namespace caffe
         public:
             explicit Solver (const SolverParameter& param);
             explicit Solver (const string& param_file);
-            void Init (const SolverParameter& param);
+            void Init (const SolverParameter& param);//初始化网络，随机或使用指定的snapshot
             //训练时使用的网络结构文件中有训练时有而测试时没有的层，下面的函数用于初始化这两个不同的网络
             void InitTrainNet();
             void InitTestNets();

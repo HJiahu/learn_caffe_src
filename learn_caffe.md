@@ -20,6 +20,7 @@ caffe源码阅读杂记
 ### 我的阅读过程
 #### 大致的过程
 *	读caffe前对深度学习没有什么概念所以先通读了上面参考网页中的第一个并详细阅读了其中的network1代码，阅读过程在[这里][18]
+*	大概了解几个类的结构后读了tools文件夹下的几个文件：caffe.cpp、convert_imageset.cpp、extract_features.cpp
 
 #### Caffe中几个主要的类
 *	Blob: 数据的保存与传递都使用的类(神经网络中主要的参数就是神经元之间的权值与偏置值，其均使用Blob对象保存与交互)
@@ -204,8 +205,8 @@ caffe源码阅读杂记
 *	以lenet网络的训练solver为例说明solver需要的参数（并发全部）
 
 		net: "./lenet_train_test.prototxt" #网络结构文件
-		#指明测试时前向传输的次数（每次batch size个样本）
-		#平均这些结果即为网络的当前对test数据集的精度
+		# 指明测试时前向传输的次数（每次batch size个样本）
+		# 平均这些结果即为网络的当前对test数据集的精度
 		test_iter: 100 
 		test_interval: 100 # 指明进行多少次训练后进行测试
 		
@@ -254,7 +255,22 @@ caffe源码阅读杂记
 		...
 
 ##### input_layer（type：Data）
+*	caffe使用LMDB作为训练数据保存与特征数据提取后存放的格式
+	*	LMDB采用内存-映射文件（memory-mapped files），所以拥有非常好的I/O性能
+	*	对于大型数据库（LMDB文件较大），LMDB以页缓存的形式可以不一次把全部文件写进内存中
+	*	lmdb数据库是一个非关系型数据库，caffe使用LMDB数据库有以下几点原因：
+		*	提高磁盘IO利用率
+		*	保持数据的一致性，便于系统的解耦与维护
+*	Datum类
+	*	Datum是caffe保存于LMDB中的基本元素，可以认为caffe所使用的LMDB文件中保存的是Datum对象的数组
+	*	Datum中包含以下几个（部分）数据成员（具体请参考caffe.proto）
 
+			optional int32 channels = 1;//这三个参数表示图像的信息
+			optional int32 height = 2;
+			optional int32 width = 3;
+			optional bytes data = 4;//图像的具体像素值，是个数组
+			optional int32 label = 5;//当前图像所对应的类型标签
+			repeated float float_data = 6;//保存特征信息的数组，一般是网络中层的数据（w&b）
 
 
 

@@ -20,8 +20,7 @@ namespace caffe
         public:
             explicit DataLayer (const LayerParameter& param);
             virtual ~DataLayer();
-            virtual void DataLayerSetUp (const vector<Blob<Dtype>*>& bottom,
-                                         const vector<Blob<Dtype>*>& top);
+            virtual void DataLayerSetUp (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
             virtual inline const char* type() const { return "Data"; }
             virtual inline int ExactNumBottomBlobs() const { return 0; }
             virtual inline int MinTopBlobs() const { return 1; }

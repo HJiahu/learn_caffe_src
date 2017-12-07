@@ -1700,11 +1700,13 @@ namespace caffe
     }
     
     // Check for deprecations and upgrade the SolverParameter as needed.
+    // 因为caffe一直在更新所以有些旧的参数在新版本中是不能使用的，所以使用当前函数将旧版本中的信息替换成新版本中的信息
     bool UpgradeSolverAsNeeded (const string& param_file, SolverParameter* param)
     {
         bool success = true;
         
         // Try to upgrade old style solver_type enum fields into new string type
+        // 用新版本中的数据更新旧版本中的一些数据
         if (SolverNeedsTypeUpgrade (*param))
         {
             LOG (INFO) << "Attempting to upgrade input file specified using deprecated "
@@ -1733,8 +1735,10 @@ namespace caffe
     void ReadSolverParamsFromTextFileOrDie (const string& param_file,
                                             SolverParameter* param)
     {
+        //使用google提供的方法读取proto文件到指定的位置，也使用google提供的方法判断了文件的格式是否正确
         CHECK (ReadProtoFromTextFile (param_file, param))
                 << "Failed to parse SolverParameter file: " << param_file;
+        // 因为caffe一直在更新所以有些旧的参数在新版本中是不能使用的，所以使用当前函数将旧版本中的信息替换成新版本中的信息
         UpgradeSolverAsNeeded (param_file, param);
     }
     

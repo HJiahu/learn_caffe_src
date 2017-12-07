@@ -144,9 +144,13 @@ namespace caffe
         return false;
     }
     
-    bool ReadImageToDatum (const string& filename, const int label,
-                           const int height, const int width, const bool is_color,
-                           const std::string & encoding, Datum* datum)
+    bool ReadImageToDatum (const string& filename,
+                           const int label,
+                           const int height,
+                           const int width,
+                           const bool is_color,
+                           const std::string & encoding,
+                           Datum* datum)
     {
         cv::Mat cv_img = ReadImageToCVMat (filename, height, width, is_color);
         
@@ -269,6 +273,7 @@ namespace caffe
         }
     }
     
+	//直接拷贝Mat中图片的data到datum的data中
     void CVMatToDatum (const cv::Mat& cv_img, Datum* datum)
     {
         CHECK (cv_img.depth() == CV_8U) << "Image data type must be unsigned byte";

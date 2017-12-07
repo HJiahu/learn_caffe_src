@@ -14,8 +14,7 @@ namespace caffe
 
     template <typename Dtype>
     DataLayer<Dtype>::DataLayer (const LayerParameter& param)
-        : BasePrefetchingDataLayer<Dtype> (param),
-          offset_()
+        : BasePrefetchingDataLayer<Dtype> (param), offset_()
     {
 		//设置数据读取对象，不同格式的数据使用不同的对象读取，这里使用LMDB
         db_.reset (db::GetDB (param.data_param().backend()));

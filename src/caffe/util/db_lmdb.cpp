@@ -21,7 +21,8 @@ namespace caffe
             
             if (mode == NEW)
             {
-                CHECK_EQ (mkdir (source.c_str(), 0744), 0) << "mkdir " << source << " failed";
+                //comment by HJiahu @ 2017/12/07 for learning
+                //CHECK_EQ (mkdir (source.c_str(), 0744), 0) << "mkdir " << source << " failed";
             }
             
             int flags = 0;

@@ -62,6 +62,8 @@ namespace caffe
                 << filtered_param.DebugString();
         // Create a copy of filtered_param with splits added where necessary.
         NetParameter param;
+		//当网络层A的输出会作为网络层B，C的输入，那么InsertSplits()函数会产生一层split层，就是对共享输入的层，在这些层前面加入一层split
+		//https://github.com/BVLC/caffe/issues/767
         InsertSplits (filtered_param, &param);
         // Basically, build all the layers and set up their connections.
         name_ = param.name();
@@ -69,7 +71,7 @@ namespace caffe
         set<string> available_blobs;
         memory_used_ = 0;
         // For each layer, set up its input and output
-        bottom_vecs_.resize (param.layer_size());
+        bottom_vecs_.resize (param.layer_size());//layer_size 返回的是这个网络中有多少层（多少个 layer ）
         top_vecs_.resize (param.layer_size());
         bottom_id_vecs_.resize (param.layer_size());
         param_id_vecs_.resize (param.layer_size());
@@ -87,10 +89,10 @@ namespace caffe
             // Setup layer.
             const LayerParameter& layer_param = param.layer (layer_id);
             
+			//用于判断反向传播层数的正误
             if (layer_param.propagate_down_size() > 0)
             {
-                CHECK_EQ (layer_param.propagate_down_size(),
-                          layer_param.bottom_size())
+                CHECK_EQ (layer_param.propagate_down_size(), layer_param.bottom_size())
                         << "propagate_down param must be specified "
                         << "either 0 or bottom_size times ";
             }
@@ -148,7 +150,7 @@ namespace caffe
             // After this layer is connected, set it up.
             layers_[layer_id]->SetUp (bottom_vecs_[layer_id], top_vecs_[layer_id]);
             LOG_IF (INFO, Caffe::root_solver()) << "Setting up " << layer_names_[layer_id];
-                    
+            
             for (int top_id = 0; top_id < top_vecs_[layer_id].size(); ++top_id)
             {
                 if (blob_loss_weights_.size() <= top_id_vecs_[layer_id][top_id])

@@ -29,10 +29,11 @@ namespace caffe
         const SolverParameter& param)
     {
         const string& type = param.type();
-        CreatorRegistry& registry = Registry();
+        CreatorRegistry& registry = Registry();//typedef std::map<string, Creator> CreatorRegistry;
         CHECK_EQ (registry.count (type), 1)
                 << "Unknown solver type: " << type
                 << " (known types: " << SolverTypeListString() << ")";
+        //auto solver_jh =
         return registry[type] (param);
     }
     

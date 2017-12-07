@@ -1,3 +1,5 @@
+//#define READ_THIS_FILE
+#ifdef READ_THIS_FILE
 #ifdef WITH_PYTHON_LAYER
     #include "boost/python.hpp"
     namespace bp = boost::python;
@@ -164,8 +166,8 @@ vector<string> get_stages_from_flags()
 // To add a command, define a function "int command()" and register it with
 // RegisterBrewFunction(action);
 
-//显示指定gpu的一些信息，例如：caffe device_query -gpu 0
-//将显示gpu 0的一些信息，例如内存大小、共享内存大小等
+// 显示指定gpu的一些信息，例如：caffe device_query -gpu 0
+// 将显示gpu 0的一些信息，例如内存大小、共享内存大小等
 // Device Query: show diagnostic information for a GPU device.
 int device_query()
 {
@@ -229,15 +231,17 @@ caffe::SolverAction::Enum GetRequestedAction (const std::string& flag_value)
 // Train / Finetune a model.
 int train()
 {
-    //训练的时候必须提供一个solver
+    //训练的时候必须提供一个 solver
     CHECK_GT (FLAGS_solver.size(), 0) << "Need a solver definition to train.";
-    //也可以提供一个已经训练好的model在其基础上进行训练
+    //也可以提供一个已经训练好的 model 在其基础上进行训练
     CHECK (!FLAGS_snapshot.size() || !FLAGS_weights.size())
             << "Give a snapshot to resume training or weights to finetune but not both.";
     vector<string> stages = get_stages_from_flags();
     //从solver文件中读取solver信息到指定的对象中
     caffe::SolverParameter solver_param;
+    auto slover_jh = FLAGS_solver;//"I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt"
     caffe::ReadSolverParamsFromTextFileOrDie (FLAGS_solver, &solver_param);
+    auto level_jh = FLAGS_level;
     solver_param.mutable_train_state()->set_level (FLAGS_level);
     
     for (int i = 0; i < stages.size(); i++)
@@ -247,6 +251,8 @@ int train()
     
     // If the gpus flag is not provided, allow the mode and device to be set
     // in the solver prototxt.
+    auto &gpu_jh = FLAGS_gpu;
+    
     if (FLAGS_gpu.size() == 0
             && solver_param.has_solver_mode()
             && solver_param.solver_mode() == caffe::SolverParameter_SolverMode_GPU)
@@ -300,12 +306,11 @@ int train()
         Caffe::set_solver_count (gpus.size());
     }
     
-    caffe::SignalHandler signal_handler (
-        GetRequestedAction (FLAGS_sigint_effect),
-        GetRequestedAction (FLAGS_sighup_effect));
-    shared_ptr<caffe::Solver<float> >
-    solver (caffe::SolverRegistry<float>::CreateSolver (solver_param));
+    caffe::SignalHandler signal_handler (GetRequestedAction (FLAGS_sigint_effect), GetRequestedAction (FLAGS_sighup_effect));
+    //创建 solver 并初始化网络
+    shared_ptr<caffe::Solver<float> >  solver (caffe::SolverRegistry<float>::CreateSolver (solver_param));
     solver->SetActionFunction (signal_handler.GetActionFunction());
+    auto &snapshot_jh = FLAGS_snapshot;
     
     if (FLAGS_snapshot.size())
     {
@@ -333,6 +338,7 @@ int train()
     
     else
     {
+        //初始化完solve之后就开始读取训练数据、开始训练了
         solver->Solve();
     }
     
@@ -545,6 +551,8 @@ int time()
 }
 RegisterBrewFunction (time);
 
+/*********************************************   main is here  *************************************************/
+
 int main (int argc, char** argv)
 {
     //至少在vs2015中调试代码时argc与argv依旧可用此时argc==1
@@ -598,3 +606,5 @@ int main (int argc, char** argv)
         gflags::ShowUsageWithFlagsRestrict (argv[0], "tools/caffe");
     }
 }
+
+#endif

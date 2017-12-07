@@ -347,7 +347,7 @@ namespace caffe
     }
     
     template <typename Dtype>
-    void Solver<Dtype>::Solve (const char* resume_file)
+    void Solver<Dtype>::Solve (const char* resume_file) //Ä¬ÈÏ²ÎÊý£ºresume_file == nullptr
     {
         CHECK (Caffe::root_solver());
         LOG (INFO) << "Solving " << net_->name();
@@ -364,12 +364,11 @@ namespace caffe
         // For a network that is trained by the solver, no bottom or top vecs
         // should be given, and we will just provide dummy vecs.
         int start_iter = iter_;
-        Step (param_.max_iter() - iter_);
+        Step (param_.max_iter() - iter_); //ÑµÁ·
         
         // If we haven't already, save a snapshot after optimization, unless
         // overridden by setting snapshot_after_train := false
-        if (param_.snapshot_after_train()
-                && (!param_.snapshot() || iter_ % param_.snapshot() != 0))
+        if (param_.snapshot_after_train() && (!param_.snapshot() || iter_ % param_.snapshot() != 0))
         {
             Snapshot();
         }

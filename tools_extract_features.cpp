@@ -1,5 +1,5 @@
-#define READ_THIS_FILE
-#ifdef READ_THIS_FILE
+﻿//#define READ_THIS_FILE
+#ifdef  READ_THIS_FILE
 #include <string>
 #include <vector>
 
@@ -26,18 +26,34 @@ int feature_extraction_pipeline (int argc, char** argv);
 
 int main (int argc, char** argv)
 {
-    return feature_extraction_pipeline<float> (argc, argv);
+    argc = 7;
+    char *mock_argv[] =
+    {
+        "",
+        R"(I:/learn_caffe/learn_caffe/caffe_src/lenet_model/lenet_iter_20000.caffemodel)",
+        R"(I:/learn_caffe/learn_caffe/caffe_src/lenet_model/lenet.prototxt)",
+        "conv2",
+        R"(I:/learn_caffe/learn_caffe/caffe_src/lenet_model/features)",
+        "10",
+        "lmdb"
+    };
+    mock_argv[0] = argv[0];
+    return feature_extraction_pipeline<float> (argc, mock_argv);
     //  return feature_extraction_pipeline<double>(argc, argv);
 }
 
 template<typename Dtype>
 int feature_extraction_pipeline (int argc, char** argv)
 {
-    ::google::InitGoogleLogging (argv[0]);
+    //::google::InitGoogleLogging (argv[0]);
     const int num_required_args = 7;
     
     if (argc < num_required_args)
     {
+        // 一般的使用方法：
+        // extract_features.bin bvlc_reference_caffenet.caffemodel imagenet_val.prototxt fc7 ./features 10 leveldb
+        // 倒数第四个参数指定抽取的层，倒数第三个参数指明保存的位置，倒数第二个参数表示抽取的mini_batch，最后一个指明保存的格式
+        // 将生成一个数据库文件，LMDB或leveldb格式
         LOG (ERROR) <<
                     "This program takes in a trained network and an input data layer, and then"
                     " extract features of the input data produced by the net.\n"
@@ -53,7 +69,7 @@ int feature_extraction_pipeline (int argc, char** argv)
     }
     
     int arg_pos = num_required_args;
-    arg_pos = num_required_args;
+    //arg_pos = num_required_args;
     
     if (argc > arg_pos && strcmp (argv[arg_pos], "GPU") == 0)
     {
@@ -78,7 +94,7 @@ int feature_extraction_pipeline (int argc, char** argv)
     }
     
     arg_pos = 0;  // the name of the executable
-    std::string pretrained_binary_proto (argv[++arg_pos]);
+    std::string pretrained_binary_proto (argv[++arg_pos]);//caffemodel文件位置
     // Expected prototxt contains at least one data layer such as
     //  the layer data_layer_name and one feature blob such as the
     //  fc7 top blob to extract features.
@@ -106,21 +122,21 @@ int feature_extraction_pipeline (int argc, char** argv)
     top: "fc7"
     }
     */
-    std::string feature_extraction_proto (argv[++arg_pos]);
-    boost::shared_ptr<Net<Dtype> > feature_extraction_net (
-        new Net<Dtype> (feature_extraction_proto, caffe::TEST));
-    feature_extraction_net->CopyTrainedLayersFrom (pretrained_binary_proto);
-    std::string extract_feature_blob_names (argv[++arg_pos]);
+    std::string feature_extraction_proto (argv[++arg_pos]);//prototxt文件位置
+    //由prototxt创建了一个对应的网络
+    boost::shared_ptr<Net<Dtype> > feature_extraction_net (new Net<Dtype> (feature_extraction_proto, caffe::TEST));
+    feature_extraction_net->CopyTrainedLayersFrom (pretrained_binary_proto);//读训练好的文件到网络中
+    std::string extract_feature_blob_names (argv[++arg_pos]);//需要提取特征的层：conv2
     std::vector<std::string> blob_names;
+    //因为可能要提取多个不同层的内容，所以这里blob_names将保存这些层的名称，便于后面的处理，这里只提取了conv2一层的数据
     boost::split (blob_names, extract_feature_blob_names, boost::is_any_of (","));
-    std::string save_feature_dataset_names (argv[++arg_pos]);
-    std::vector<std::string> dataset_names;
-    boost::split (dataset_names, save_feature_dataset_names,
-                  boost::is_any_of (","));
-    CHECK_EQ (blob_names.size(), dataset_names.size()) <<
-            " the number of blob names and dataset names must be equal";
+    std::string save_feature_dataset_names (argv[++arg_pos]);//保存特征的数据库位置
+    std::vector<std::string> dataset_names;//因为我们可以同时提取不同层的特征所以这里要给出不同层信息保存的位置（提取层与保存的位置是对应的）
+    boost::split (dataset_names, save_feature_dataset_names, boost::is_any_of (","));
+    CHECK_EQ (blob_names.size(), dataset_names.size()) <<  " the number of blob names and dataset names must be equal";
     size_t num_features = blob_names.size();
     
+    //检查是否有对应的层
     for (size_t i = 0; i < num_features; i++)
     {
         CHECK (feature_extraction_net->has_blob (blob_names[i]))
@@ -133,6 +149,7 @@ int feature_extraction_pipeline (int argc, char** argv)
     std::vector<boost::shared_ptr<db::Transaction> > txns;
     const char* db_type = argv[++arg_pos];
     
+    //创建保存特征的数据库
     for (size_t i = 0; i < num_features; ++i)
     {
         LOG (INFO) << "Opening dataset " << dataset_names[i];
@@ -153,8 +170,10 @@ int feature_extraction_pipeline (int argc, char** argv)
         
         for (int i = 0; i < num_features; ++i)
         {
-            const boost::shared_ptr<Blob<Dtype> > feature_blob =
-                feature_extraction_net->blob_by_name (blob_names[i]);
+            //通过BLOB的名称获得对应blob的信息
+            const boost::shared_ptr<Blob<Dtype> > feature_blob = feature_extraction_net->blob_by_name (blob_names[i]);
+			// 一般在输入层（datalayer）可以指定输入的batch size而且网络可以在一次的forward中给出batch size个输出（预测数组）
+			// 这里所提取的网络特征设batch size为1应该就可以了，多了具体有什么影响还不太清楚 2017/12/08
             int batch_size = feature_blob->num();
             int dim_features = feature_blob->count() / batch_size;
             const Dtype* feature_blob_data;
@@ -166,9 +185,8 @@ int feature_extraction_pipeline (int argc, char** argv)
                 datum.set_channels (feature_blob->channels());
                 datum.clear_data();
                 datum.clear_float_data();
-                feature_blob_data = feature_blob->cpu_data() +
-                                    feature_blob->offset (n);
-                                    
+                feature_blob_data = feature_blob->cpu_data() + feature_blob->offset (n);
+                
                 for (int d = 0; d < dim_features; ++d)
                 {
                     datum.add_float_data (feature_blob_data[d]);

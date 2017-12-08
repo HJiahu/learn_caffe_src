@@ -1,4 +1,4 @@
-//#define READ_THIS_FILE
+#define READ_THIS_FILE
 #ifdef READ_THIS_FILE
 #ifdef WITH_PYTHON_LAYER
     #include "boost/python.hpp"
@@ -347,7 +347,10 @@ int train()
 }
 RegisterBrewFunction (train);
 
-
+/***********************************************  test  *************************************************/
+//一般的指令格式为：caffe test -model .\lenet_train_test.prototxt -weights .\lenet_iter_20000.caffemodel -iterations 100
+//caffe将使用训练模型中的test数据对网络进行iterations次测试并给出网络的精度
+//如果想读caffe具体的forward过程可以看
 // Test: score a model.
 int test()
 {

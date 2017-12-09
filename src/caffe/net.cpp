@@ -48,6 +48,7 @@ namespace caffe
         Init (param);
     }
     
+    //初始化网络 begin of Init
     template <typename Dtype>
     void Net<Dtype>::Init (const NetParameter& in_param)
     {
@@ -56,14 +57,15 @@ namespace caffe
         // Filter layers based on their include/exclude rules and
         // the current NetState.
         NetParameter filtered_param;
+        //Remove layers that the user specified should be excluded given the current *phase, level, and stage.
         FilterNet (in_param, &filtered_param);
         LOG_IF (INFO, Caffe::root_solver())
                 << "Initializing net from parameters: " << std::endl
                 << filtered_param.DebugString();
         // Create a copy of filtered_param with splits added where necessary.
         NetParameter param;
-		//当网络层A的输出会作为网络层B，C的输入，那么InsertSplits()函数会产生一层split层，就是对共享输入的层，在这些层前面加入一层split
-		//https://github.com/BVLC/caffe/issues/767
+        //当网络层A的输出会作为网络层B，C的输入，那么InsertSplits()函数会产生一层split层，就是对共享输入的层，在这些层前面加入一层split
+        //https://github.com/BVLC/caffe/issues/767
         InsertSplits (filtered_param, &param);
         // Basically, build all the layers and set up their connections.
         name_ = param.name();
@@ -71,7 +73,9 @@ namespace caffe
         set<string> available_blobs;
         memory_used_ = 0;
         // For each layer, set up its input and output
-        bottom_vecs_.resize (param.layer_size());//layer_size 返回的是这个网络中有多少层（多少个 layer ）
+        // layer_size 返回的是这个网络中有多少层（多少个 layer ），一般每个层都有两个blob（bottom和top）
+        // 在网络文件中定义的可以共享的层通过InsertSplits处理之后会添加新的层（splitlayer）信息到param中
+        bottom_vecs_.resize (param.layer_size());
         top_vecs_.resize (param.layer_size());
         bottom_id_vecs_.resize (param.layer_size());
         param_id_vecs_.resize (param.layer_size());
@@ -89,7 +93,7 @@ namespace caffe
             // Setup layer.
             const LayerParameter& layer_param = param.layer (layer_id);
             
-			//用于判断反向传播层数的正误
+            //用于判断反向传播层数的正误
             if (layer_param.propagate_down_size() > 0)
             {
                 CHECK_EQ (layer_param.propagate_down_size(), layer_param.bottom_size())
@@ -103,9 +107,9 @@ namespace caffe
                     << "Creating Layer " << layer_param.name();
             bool need_backward = false;
             
+			//HJiahu 2017/12/09:16:09
             // Figure out this layer's input and output
-            for (int bottom_id = 0; bottom_id < layer_param.bottom_size();
-                    ++bottom_id)
+            for (int bottom_id = 0; bottom_id < layer_param.bottom_size(); ++bottom_id)
             {
                 const int blob_id = AppendBottom (param, layer_id, bottom_id,
                                                   &available_blobs, &blob_name_to_idx);
@@ -341,7 +345,8 @@ namespace caffe
         ShareWeights();
         debug_info_ = param.debug_info();
         LOG_IF (INFO, Caffe::root_solver()) << "Network initialization done.";
-    }
+    } //end of Init function
+    
     
     template <typename Dtype>
     void Net<Dtype>::FilterNet (const NetParameter& param,

@@ -1,4 +1,4 @@
-#define READ_THIS_FILE
+ï»¿#define READ_THIS_FILE
 #ifdef READ_THIS_FILE
 #ifdef WITH_PYTHON_LAYER
     #include "boost/python.hpp"
@@ -27,9 +27,9 @@ using caffe::Timer;
 using caffe::vector;
 using std::ostringstream;
 
-// ÏÂÃæ¶¨Òå¿ÉÖ´ĞĞÎÄ¼şÔÚÖ´ĞĞÊ±¿ÉÓÃµÄ²ÎÊı£¬ÀıÈçÎÒÃÇÊ¹ÓÃcaffe½øĞĞÑµÁ·Ê±Ê¹ÓÃµÄÖ¸ÁîÎª£º
-// caffe train -solver ./*solver.prototxt -gpu 0£¬¿ÉÊ¹ÓÃ²ÎÊısolverºÍgpuµÈ¾ÍÊÇÔÚÏÂÃæ¶¨Òå
-// ÔÚ¿ÉÖ´ĞĞÎÄ¼şÖ´ĞĞÊ±Ê±£¬¿ÉÒÔÊ¹ÓÃÖ¸¶¨µÄ±äÁ¿ÌáÈ¡ÕâĞ©²ÎÊı£¬ÀıÈçgup²ÎÊıÖµ¿ÉÒÔÍ¨¹ıÈ«¾Ö±äÁ¿FLAGS_gpu»ñµÃ
+// ä¸‹é¢å®šä¹‰å¯æ‰§è¡Œæ–‡ä»¶åœ¨æ‰§è¡Œæ—¶å¯ç”¨çš„å‚æ•°ï¼Œä¾‹å¦‚æˆ‘ä»¬ä½¿ç”¨caffeè¿›è¡Œè®­ç»ƒæ—¶ä½¿ç”¨çš„æŒ‡ä»¤ä¸ºï¼š
+// caffe train -solver ./*solver.prototxt -gpu 0ï¼Œå¯ä½¿ç”¨å‚æ•°solverå’Œgpuç­‰å°±æ˜¯åœ¨ä¸‹é¢å®šä¹‰
+// åœ¨å¯æ‰§è¡Œæ–‡ä»¶æ‰§è¡Œæ—¶æ—¶ï¼Œå¯ä»¥ä½¿ç”¨æŒ‡å®šçš„å˜é‡æå–è¿™äº›å‚æ•°ï¼Œä¾‹å¦‚gupå‚æ•°å€¼å¯ä»¥é€šè¿‡å…¨å±€å˜é‡FLAGS_gpuè·å¾—
 DEFINE_string (gpu, "",
                "Optional; run in GPU mode on given device IDs separated by ','."
                "Use '-gpu all' to run on all available GPUs. The effective training "
@@ -54,26 +54,27 @@ DEFINE_string (sighup_effect, "snapshot",
                "snapshot, stop or none.");
 
 // A simple registry for caffe commands.
-typedef int (*BrewFunction) ();//¶¨Òåº¯ÊıÖ¸Õë
-typedef std::map<caffe::string, BrewFunction> BrewMap;//Í¨¹ıÃû³Æ²éÕÒ¶ÔÓ¦µÄº¯Êı
+typedef int (*BrewFunction) ();//å®šä¹‰å‡½æ•°æŒ‡é’ˆ
+typedef std::map<caffe::string, BrewFunction> BrewMap;//é€šè¿‡åç§°æŸ¥æ‰¾å¯¹åº”çš„å‡½æ•°
 BrewMap g_brew_map;
 
-//±àÒëÆ÷½«ÎªÄäÃûÃû×Ö¿Õ¼äÉú³ÉÎ¨Ò»µÄÃû³Æxx²¢×Ô¶¯Ìí¼ÓÒ»ÌõÖ¸Áî£ºusing xx;
-//±àÒëÆ÷½«°ÑÉú³ÉµÄÃû×Ö¿Õ¼äÃû×ÖÌí¼Óµ½ÄäÃû¿Õ¼äÖĞµÄ±äÁ¿Ç©ÃûÖĞ£¬
-//ÕâÑùÔÚÆäËûÎÄ¼şÖĞ¾ÍÎŞ·¨Á´½ÓÕâĞ©±äÁ¿£¬ÓëstaticĞ§¹ûÏàÍ¬£¨À´±£Ö¤Éú³ÉµÄ·ûºÅÊÇ¾Ö²¿µÄ£©
-//Ö÷ÒªÔ­ÒòÊÇÃû×ÖxxÊÇËæ»úÇÒÎ¨Ò»µÄËùÒÔÍâ½çÄÑÒÔÁ¬½Ó²¢²»ÊÇËµ²»ÄÜ£¬»¹ÓĞstatic²»ÄÜĞŞÊÎclass£¬¶øÄäÃû¿Õ¼ä¿ÉÒÔ
+//ç¼–è¯‘å™¨å°†ä¸ºåŒ¿ååå­—ç©ºé—´ç”Ÿæˆå”¯ä¸€çš„åç§°xxå¹¶è‡ªåŠ¨æ·»åŠ ä¸€æ¡æŒ‡ä»¤ï¼šusing xx;
+//ç¼–è¯‘å™¨å°†æŠŠç”Ÿæˆçš„åå­—ç©ºé—´åå­—æ·»åŠ åˆ°åŒ¿åç©ºé—´ä¸­çš„å˜é‡ç­¾åä¸­ï¼Œ
+//è¿™æ ·åœ¨å…¶ä»–æ–‡ä»¶ä¸­å°±æ— æ³•é“¾æ¥è¿™äº›å˜é‡ï¼Œä¸staticæ•ˆæœç›¸åŒï¼ˆæ¥ä¿è¯ç”Ÿæˆçš„ç¬¦å·æ˜¯å±€éƒ¨çš„ï¼‰
+//ä¸»è¦åŸå› æ˜¯åå­—xxæ˜¯éšæœºä¸”å”¯ä¸€çš„æ‰€ä»¥å¤–ç•Œéš¾ä»¥è¿æ¥å¹¶ä¸æ˜¯è¯´ä¸èƒ½ï¼Œè¿˜æœ‰staticä¸èƒ½ä¿®é¥°classï¼Œè€ŒåŒ¿åç©ºé—´å¯ä»¥
+//åœ¨ç³»ç»ŸæŠŠæ§åˆ¶æƒäº¤ç»™mainå‡½æ•°å…¥å£å‰å®Œæˆä¸€äº›å‡½æ•°çš„æ³¨å†Œ
 #define RegisterBrewFunction(func) \
 namespace { \
-class __Registerer_##func { /*ÀûÓÃ¹¹Ôìº¯Êı½«º¯ÊıÖ¸ÕëĞ´½øÈ«¾Ö±äÁ¿g_brew_mapÖĞ*/\
+class __Registerer_##func { /*åˆ©ç”¨æ„é€ å‡½æ•°å°†å‡½æ•°æŒ‡é’ˆå†™è¿›å…¨å±€å˜é‡g_brew_mapä¸­*/\
  public: /* NOLINT */ \
   __Registerer_##func() { \
     g_brew_map[#func] = &func; \
   } \
 }; \
-__Registerer_##func g_registerer_##func; /*¶¨Òå¶ÔÏó£¬×Ô¶¯µ÷ÓÃ¹¹Ôìº¯Êı*/\
+__Registerer_##func g_registerer_##func; /*å®šä¹‰å¯¹è±¡ï¼Œè‡ªåŠ¨è°ƒç”¨æ„é€ å‡½æ•°*/\
 }
 
-//´Óg_brew_mapÖĞÌáÈ¡Ö¸¶¨µÄº¯ÊıÖ¸Õë
+//ä»g_brew_mapä¸­æå–æŒ‡å®šçš„å‡½æ•°æŒ‡é’ˆ
 static BrewFunction GetBrewFunction (const caffe::string& name)
 {
     if (g_brew_map.count (name))
@@ -96,7 +97,7 @@ static BrewFunction GetBrewFunction (const caffe::string& name)
     }
 }
 
-//ÉèÖÃÊ¹ÓÃµÄGPUs£¬¿ÉÒÔÖ¸¶¨Ä³¸ö£¨Èôgpu 0£©»òËùÓĞ
+//è®¾ç½®ä½¿ç”¨çš„GPUsï¼Œå¯ä»¥æŒ‡å®šæŸä¸ªï¼ˆè‹¥gpu 0ï¼‰æˆ–æ‰€æœ‰
 // Parse GPU ids or use all available devices
 static void get_gpus (vector<int>* gpus)
 {
@@ -133,7 +134,7 @@ static void get_gpus (vector<int>* gpus)
         }
 }
 
-// ´ÓÖ¸ÁîÖĞÌáÈ¡caffeµÄÔËĞĞphase
+// ä»æŒ‡ä»¤ä¸­æå–caffeçš„è¿è¡Œphase
 // Parse phase from flags
 caffe::Phase get_phase_from_flags (caffe::Phase default_value)
 {
@@ -150,7 +151,7 @@ caffe::Phase get_phase_from_flags (caffe::Phase default_value)
     return caffe::TRAIN;  // Avoid warning
 }
 
-//²»Ã÷°×stageÊÇÊ²Ã´
+//ä¸æ˜ç™½stageæ˜¯ä»€ä¹ˆ
 // Parse stages from flags
 vector<string> get_stages_from_flags()
 {
@@ -159,15 +160,15 @@ vector<string> get_stages_from_flags()
     return stages;
 }
 
-//¾ßÌåÖ¸ÁîµÄÊµÏÖÈç£ºtrain¡¢testµÈ
+//å…·ä½“æŒ‡ä»¤çš„å®ç°å¦‚ï¼štrainã€testç­‰
 // caffe commands to call by
 //     caffe <command> <args>
 //
 // To add a command, define a function "int command()" and register it with
 // RegisterBrewFunction(action);
 
-// ÏÔÊ¾Ö¸¶¨gpuµÄÒ»Ğ©ĞÅÏ¢£¬ÀıÈç£ºcaffe device_query -gpu 0
-// ½«ÏÔÊ¾gpu 0µÄÒ»Ğ©ĞÅÏ¢£¬ÀıÈçÄÚ´æ´óĞ¡¡¢¹²ÏíÄÚ´æ´óĞ¡µÈ
+// æ˜¾ç¤ºæŒ‡å®šgpuçš„ä¸€äº›ä¿¡æ¯ï¼Œä¾‹å¦‚ï¼šcaffe device_query -gpu 0
+// å°†æ˜¾ç¤ºgpu 0çš„ä¸€äº›ä¿¡æ¯ï¼Œä¾‹å¦‚å†…å­˜å¤§å°ã€å…±äº«å†…å­˜å¤§å°ç­‰
 // Device Query: show diagnostic information for a GPU device.
 int device_query()
 {
@@ -229,19 +230,24 @@ caffe::SolverAction::Enum GetRequestedAction (const std::string& flag_value)
 
 /***********************************************  train  *************************************************/
 // Train / Finetune a model.
+//å¸¸è§çš„å‘½ä»¤æ ¼å¼ï¼šcaffe train --solver=./lenet_solver.prototxt 2>&1 | tee train_doc.log
 int train()
 {
-    //ÑµÁ·µÄÊ±ºò±ØĞëÌá¹©Ò»¸ö solver
+    //è®­ç»ƒçš„æ—¶å€™å¿…é¡»æä¾›ä¸€ä¸ª solver
+    auto solver_jh = FLAGS_solver;
     CHECK_GT (FLAGS_solver.size(), 0) << "Need a solver definition to train.";
-    //Ò²¿ÉÒÔÌá¹©Ò»¸öÒÑ¾­ÑµÁ·ºÃµÄ model ÔÚÆä»ù´¡ÉÏ½øĞĞÑµÁ·
+    //ä¹Ÿå¯ä»¥æä¾›ä¸€ä¸ªå·²ç»è®­ç»ƒå¥½çš„ model åœ¨å…¶åŸºç¡€ä¸Šè¿›è¡Œè®­ç»ƒ
+    auto snapshot_jh = FLAGS_snapshot;
     CHECK (!FLAGS_snapshot.size() || !FLAGS_weights.size())
             << "Give a snapshot to resume training or weights to finetune but not both.";
+	//stages ä¸€èˆ¬æ˜¯ç”¨æˆ·è‡ªå®šä¹‰çš„ï¼Œç”¨äºå¯¹ç½‘ç»œè¿›è¡Œé‡æ„ï¼Œå…·ä½“å¯å‚è€ƒï¼šhttp://caffecn.cn/?/question/104
     vector<string> stages = get_stages_from_flags();
-    //´ÓsolverÎÄ¼şÖĞ¶ÁÈ¡solverĞÅÏ¢µ½Ö¸¶¨µÄ¶ÔÏóÖĞ
+    //ä»solveræ–‡ä»¶ä¸­è¯»å–solverä¿¡æ¯åˆ°æŒ‡å®šçš„å¯¹è±¡ä¸­
     caffe::SolverParameter solver_param;
     auto slover_jh = FLAGS_solver;//"I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt"
     caffe::ReadSolverParamsFromTextFileOrDie (FLAGS_solver, &solver_param);
-    auto level_jh = FLAGS_level;
+	//FLAGS_levelä¸stagesçš„åŠŸèƒ½ç›¸ä¼¼ï¼Œä¸€èˆ¬æ˜¯ç”¨æˆ·è‡ªå®šä¹‰çš„ï¼Œç”¨äºå¯¹ç½‘ç»œè¿›è¡Œé‡æ„ï¼Œå…·ä½“å¯å‚è€ƒï¼šhttp://caffecn.cn/?/question/104
+    auto level_jh = FLAGS_level;//ä¸€èˆ¬è€Œè¨€åˆå­¦caffeæ—¶æ˜¯ä¸ä¼šç”¨åˆ°FLAGS_levelå’Œstagesè¿™ä¸¤ä¸ªå‚æ•°çš„
     solver_param.mutable_train_state()->set_level (FLAGS_level);
     
     for (int i = 0; i < stages.size(); i++)
@@ -305,13 +311,17 @@ int train()
         Caffe::set_mode (Caffe::GPU);
         Caffe::set_solver_count (gpus.size());
     }
-    
+    //Caffeåœ¨trainæˆ–è€…testçš„è¿‡ç¨‹ä¸­éƒ½æœ‰å¯èƒ½ä¼šé‡åˆ°ç³»ç»Ÿä¿¡å·(ç”¨æˆ·æŒ‰ä¸‹ctrl+cæˆ–è€…å…³æ‰äº†æ§åˆ¶çš„terminal)
+	//æˆ‘ä»¬å¯ä»¥é€šè¿‡å¯¹sigint_effectå’Œsighup_effectæ¥è®¾ç½®é‡åˆ°ç³»ç»Ÿä¿¡å·çš„æ—¶å€™å¸Œæœ›è¿›è¡Œçš„å¤„ç†æ–¹å¼
+	//å¦‚æœç”¨æˆ·ä¸è®¾å®š(å¤§éƒ¨åˆ†æ—¶å€™æˆ‘è‡ªå·±å°±æ²¡è®¾å®š)ï¼Œsigintçš„é»˜è®¤å€¼ä¸ºâ€stopâ€ï¼Œsighupçš„é»˜è®¤å€¼ä¸ºâ€snapshotâ€ã€‚
+	//å‚è€ƒï¼šhttp://blog.csdn.net/junmuzi/article/details/52619585?locationNum=9
     caffe::SignalHandler signal_handler (GetRequestedAction (FLAGS_sigint_effect), GetRequestedAction (FLAGS_sighup_effect));
-    //´´½¨ solver ²¢³õÊ¼»¯ÍøÂç
+    //åˆ›å»º solver å¹¶åˆå§‹åŒ–ç½‘ç»œ
     shared_ptr<caffe::Solver<float> >  solver (caffe::SolverRegistry<float>::CreateSolver (solver_param));
     solver->SetActionFunction (signal_handler.GetActionFunction());
-    auto &snapshot_jh = FLAGS_snapshot;
+    //auto &snapshot_jh = FLAGS_snapshot;
     
+	//æ˜¯å¦ä»å·²æœ‰çš„æ¨¡å‹å¼€å§‹è®­ç»ƒï¼ˆfine tuningï¼‰
     if (FLAGS_snapshot.size())
     {
         LOG (INFO) << "Resuming from " << FLAGS_snapshot;
@@ -338,7 +348,7 @@ int train()
     
     else
     {
-        //³õÊ¼»¯ÍêsolveÖ®ºó¾Í¿ªÊ¼¶ÁÈ¡ÑµÁ·Êı¾İ¡¢¿ªÊ¼ÑµÁ·ÁË
+        //åˆå§‹åŒ–å®Œsolveä¹‹åå°±å¼€å§‹è¯»å–è®­ç»ƒæ•°æ®ã€å¼€å§‹è®­ç»ƒäº†
         solver->Solve();
     }
     
@@ -348,9 +358,9 @@ int train()
 RegisterBrewFunction (train);
 
 /***********************************************  test  *************************************************/
-//Ò»°ãµÄÖ¸Áî¸ñÊ½Îª£ºcaffe test -model .\lenet_train_test.prototxt -weights .\lenet_iter_20000.caffemodel -iterations 100
-//caffe½«Ê¹ÓÃÑµÁ·Ä£ĞÍÖĞµÄtestÊı¾İ¶ÔÍøÂç½øĞĞiterations´Î²âÊÔ²¢¸ø³öÍøÂçµÄ¾«¶È
-//Èç¹ûÏë¶Ácaffe¾ßÌåµÄforward¹ı³Ì¿ÉÒÔ¿´
+//ä¸€èˆ¬çš„æŒ‡ä»¤æ ¼å¼ä¸ºï¼šcaffe test -model .\lenet_train_test.prototxt -weights .\lenet_iter_20000.caffemodel -iterations 100
+//caffeå°†ä½¿ç”¨è®­ç»ƒæ¨¡å‹ä¸­çš„testæ•°æ®å¯¹ç½‘ç»œè¿›è¡Œiterationsæ¬¡æµ‹è¯•å¹¶ç»™å‡ºç½‘ç»œçš„ç²¾åº¦
+//å¦‚æœæƒ³è¯»caffeå…·ä½“çš„forwardè¿‡ç¨‹å¯ä»¥çœ‹
 // Test: score a model.
 int test()
 {
@@ -446,7 +456,7 @@ int test()
 }
 RegisterBrewFunction (test);
 
-
+/***********************************************  time  *************************************************/
 // Time: benchmark the execution time of a model.
 int time()
 {
@@ -558,11 +568,11 @@ RegisterBrewFunction (time);
 
 int main (int argc, char** argv)
 {
-    //ÖÁÉÙÔÚvs2015ÖĞµ÷ÊÔ´úÂëÊ±argcÓëargvÒÀ¾É¿ÉÓÃ´ËÊ±argc==1
+    //è‡³å°‘åœ¨vs2015ä¸­è°ƒè¯•ä»£ç æ—¶argcä¸argvä¾æ—§å¯ç”¨æ­¤æ—¶argc==1
     if (argc == 1)
     {
-        //ĞŞ¸ÄargcºÍargv£¬ÔÚº¯ÊıÄÚ²¿Ìá¹©²ÎÊı£¬±ãÓÚµ÷ÊÔ
-        //Ö¸ÁîĞÎÊ½£ºcaffe train -solver ./*solver.prototxt
+        //ä¿®æ”¹argcå’Œargvï¼Œåœ¨å‡½æ•°å†…éƒ¨æä¾›å‚æ•°ï¼Œä¾¿äºè°ƒè¯•
+        //æŒ‡ä»¤å½¢å¼ï¼šcaffe train -solver ./*solver.prototxt
         char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt";
         char * (command_vec[]) = { "caffe", "train", "-solver", solver_file_path };
         argc = 4;

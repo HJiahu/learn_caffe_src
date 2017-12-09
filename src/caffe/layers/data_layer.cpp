@@ -16,11 +16,11 @@ namespace caffe
     DataLayer<Dtype>::DataLayer (const LayerParameter& param)
         : BasePrefetchingDataLayer<Dtype> (param), offset_()
     {
-		//设置数据读取对象，不同格式的数据使用不同的对象读取，这里使用LMDB
+        //设置数据读取对象，不同格式的数据使用不同的对象读取，这里使用LMDB
         db_.reset (db::GetDB (param.data_param().backend()));
         db_->Open (param.data_param().source(), db::READ);
         //类似于fseek，设置文件的游标
-		cursor_.reset (db_->NewCursor());
+        cursor_.reset (db_->NewCursor());
     }
     
     template <typename Dtype>
@@ -38,13 +38,16 @@ namespace caffe
         Datum datum;
         datum.ParseFromString (cursor_->value());
         // Use data_transformer to infer the expected blob shape from datum.
+        // 对于数据层而言其是没有bottom的，以lenet为例，经过下一行这里的top_shape为{1,1,28,28}，下面会修改batch_size
+        // transfer对于data层而言指crop、padding等操作
         vector<int> top_shape = this->data_transformer_->InferBlobShape (datum);
         this->transformed_data_.Reshape (top_shape);
         // Reshape top[0] and prefetch_data according to the batch_size.
         top_shape[0] = batch_size;
         top[0]->Reshape (top_shape);
         
-        for (int i = 0; i < this->prefetch_.size(); ++i)
+        //prefetch应该用于从硬盘中预读训练数据，prefetch中的基本元素的size应该是batch_size
+        for (int i = 0; i < this->prefetch_.size(); ++i) //这个prefetch_的大小似乎由其他地方设定，一般按照系统的吞吐能力自动设置
         {
             this->prefetch_[i]->data_.Reshape (top_shape);
         }

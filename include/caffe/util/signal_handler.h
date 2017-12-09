@@ -6,7 +6,8 @@
 
 namespace caffe
 {
-
+    //Caffe在train或者test的过程中都有可能会遇到系统信号(用户按下ctrl+c或者关掉了控制的terminal)
+    //我们可以通过对sigint_effect和sighup_effect来设置遇到系统信号的时候希望进行的处理方式
     class SignalHandler
     {
         public:

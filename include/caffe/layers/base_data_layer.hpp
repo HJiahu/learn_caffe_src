@@ -43,6 +43,7 @@ namespace caffe
         protected:
             //当前变量的意义在于训练时是否对样本数据进行一些处理，例如crop img（图像修剪）
             TransformationParameter transform_param_;
+            //对图像进行transfer的functor
             shared_ptr<DataTransformer<Dtype> > data_transformer_;
             bool output_labels_;//是否有标签
     };
@@ -73,8 +74,8 @@ namespace caffe
             vector<shared_ptr<Batch<Dtype> > > prefetch_;
             BlockingQueue<Batch<Dtype>*> prefetch_free_;
             BlockingQueue<Batch<Dtype>*> prefetch_full_;
-            Batch<Dtype>* prefetch_current_;
             
+            Batch<Dtype>* prefetch_current_;
             Blob<Dtype> transformed_data_;
     };
     

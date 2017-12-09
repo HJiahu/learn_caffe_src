@@ -39,6 +39,7 @@ namespace caffe
              * to SetUp(), where the dimensions of the bottom blobs are provided to the
              * layer.
              */
+			// layer中的输入与输出数据都不由layer自己维护，其只是从指定的位置读取输入然后把计算好的数据写到指定的位置
             explicit Layer (const LayerParameter& param)
                 : layer_param_ (param)
             {

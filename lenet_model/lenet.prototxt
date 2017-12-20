@@ -21,7 +21,7 @@ layer {
     num_output: 20
     kernel_size: 5
     stride: 1
-    weight_filler {
+    weight_filler { #这里设定滤波器的类型与参数（指定参数的初始化方案）
       type: "xavier"
     }
     bias_filler {

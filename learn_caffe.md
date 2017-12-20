@@ -27,7 +27,9 @@ caffe源码阅读杂记
 *	Layer: Blob数据处理方式的封装，不同layer对Blob data进行不同的运算，如卷积、池化、全连接等
 *	Net: 描述网络的结构，Net中以指定的结构保存不同的Layer
 *	Solver: 网络求解类，一般使用的方法是梯度下降法
-
+#### 一些概念
+*	Loss weights
+	> 对于含有多个损失层的网络（例如，一个网络使用一个softMaxWithLoss 输入分类并使用EuclideanLoss 层进行重构），损失权值可以被用来指定它们之间的相对重要性。Caffe 中最终的损失函数可以通过对整个网络中所有的权值损失进行求和计算获得
 #### 读caffe.proto
 ##### [google/protobuf][12] 简介
 *	protobuf是一个数据[持久化与序列化][4]的工具，具体教程参考[1][1]、[2][2]、[官方C++版教程][3]（[C++教程国内免翻墙版][14]）。
@@ -63,6 +65,8 @@ caffe源码阅读杂记
 			shared_ptr<SyncedMemory> diff_;//保存反向传递时的梯度信息
 	*	成员函数
 
+			//返回指定维度的大小，例如shape(0)返回图片的个数，shape(1)返回图片的通道数
+			inline int shape(int index);
 			void Reshape (const vector<int>& shape);
 			//用于调整下标。C++数组不支持负数下标，当前函数的功能就是将负数转化为对应的正数下标
 			inline int CanonicalAxisIndex (int axis_index) const;
@@ -71,13 +75,25 @@ caffe源码阅读杂记
 #### SyncedMemory
 *	SyncedMemory类主要用于数据在CPU和GPU之间的交换，本文不深入探索当前类。
 *	SyncedMemory中的部分成员
+	*	数据成员
+			
+			void* cpu_ptr_;
+            void* gpu_ptr_;
+            size_t size_;
+            SyncedHead head_;
+            bool own_cpu_data_;
+            bool cpu_malloc_use_cuda_;
+            bool own_gpu_data_;
+            int device_;
 
-		const void* cpu_data();
-		void set_cpu_data (void* data);
-		const void* gpu_data();
-		void set_gpu_data (void* data);
-		void* mutable_cpu_data();//与上面的cpu_data和gpu_data相对应，只不过内容可改
-		void* mutable_gpu_data();
+	*	函数成员
+
+			const void* cpu_data();
+			void set_cpu_data (void* data);
+			const void* gpu_data();
+			void set_gpu_data (void* data);
+			void* mutable_cpu_data();//与上面的cpu_data和gpu_data相对应，只不过内容可改
+			void* mutable_gpu_data();
 
 #### layer.hpp
 *	layer是caffe中网络的基础，是基本的计算单元与连接单元。卷积、池化、內积、sigmoid等神经元运算都在layer中完成。caffe中的layer不但实现前向运算，同时也实现反向运算，即检测与训练运算都包含在同一个层中。
@@ -86,7 +102,7 @@ caffe源码阅读杂记
 *	每一层layer都必须实现3个关键函数：setup、forward、backward
 	*	Setup: 在初始化模型的的时候初始化层的参数和连接
 	*	Forward: 通过底层（bottom）给出的数据计算结果并传递给顶层（top）
-	*	Backward: 通过顶层(top)给出的数据计算梯度并传递给底层(bottom)。 A layer with parameters computes the gradient w.r.t. to its parameters and stores it internally.
+	*	Backward: 通过顶层(top)给出的数据计算梯度并传递给底层(bottom)。 A layer with parameters computes the gradient w.r.t. to its parameters and stores it internally.一个有参数的layer 需要计算相对于各个参数的梯度值并存储在内部。
 *	forward和backward函数有对应的CPU与GPU版，如果没有定义GPU版函数，则退化使用CPU函数
 *	layer类中的成员有
 	*	LayerParameter是个大杂烩，每个层需要的参数都在其中有定义，只不过对于某个层不用的参数，LayerParameter中只保存其默认值（在调试的时候通过查看type_来确定层的类型）
@@ -95,7 +111,8 @@ caffe源码阅读杂记
 			//当前层的参数，LayerParameter的结构定义在caffe.proto中
 			LayerParameter layer_param_;
 			Phase phase_;//用于测试还是训练，有些层只能用于测试，而有些是测试训练均可
-			vector<shared_ptr<Blob<Dtype> > > blobs_;//指向需要训练的参数（w和b）
+			//指向需要训练的参数（w和b等），在卷积层中blobs_[0]保存权重信息blobs_[1]为偏置
+			vector<shared_ptr<Blob<Dtype> > > blobs_;
 			/** Vector indicating whether to compute the diff of each param blob. */
 			vector<bool> param_propagate_down_;
 			
@@ -112,6 +129,7 @@ caffe源码阅读杂记
 			virtual void ToProto (...);
 
 #### net.hpp
+*	可以说net是caffe的核心，读通了net的代码也就理解了整个caffe的运作机制，剩下的就是有选择的读层的代码。
 *	net类定义了网络的结构，即各个层(layers)之间的组合（连接）方式。网络的结构在caffe中是定义在prototxt文件中的，下面以lenet网络的部分结构为例来说明（caffe中的网络层可以并列，下面使用deepid网络为例来说明）
 	
 		name: "LeNet"#网络结构的名称
@@ -343,6 +361,7 @@ caffe源码阅读杂记
 		}
 
 *	The Protocol Buffer API（通过 Protobuf 编译器编译上面的proto文件所获得的）
+	*	示例指令：`protoc -I=$SRC_DIR --cpp_out=$DST_DIR $SRC_DIR/addressbook.proto`
 
 		// name
 		inline bool has_name() const;//判断信息中是否包含当前元素

@@ -12,6 +12,7 @@ namespace caffe
     // therefore its value is always lower than 0x800... where casting
     // negative value of a parameter converts it to value higher than 0x800...
     // The casting allows to use one condition instead of two.
+    //若a大于0且严格小于b，则返回真，否则返回假，该函数的作用是判断矩阵上某元的输出是否为pad的0。
     inline bool is_a_ge_zero_and_a_lt_b (int a, int b)
     {
         return static_cast<unsigned> (a) < static_cast<unsigned> (b);
@@ -25,22 +26,24 @@ namespace caffe
                      const int dilation_h, const int dilation_w,
                      Dtype* data_col)
     {
-        const int output_h = (height + 2 * pad_h -
-                              (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
-        const int output_w = (width + 2 * pad_w -
-                              (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
+        const int output_h = (height + 2 * pad_h - (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
+        const int output_w = (width + 2 * pad_w - (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
         const int channel_size = height * width;
         
-        for (int channel = channels; channel--; data_im += channel_size)
+        for (int channel = channels; channel--; data_im += channel_size) //通道
         {
-            for (int kernel_row = 0; kernel_row < kernel_h; kernel_row++)
+            for (int kernel_row = 0; kernel_row < kernel_h; kernel_row++) //核的行
             {
-                for (int kernel_col = 0; kernel_col < kernel_w; kernel_col++)
+                for (int kernel_col = 0; kernel_col < kernel_w; kernel_col++) //核的列
                 {
+                    //dilation_h这个变量是每隔多少个像素取值，比如dilation_h=2，下采样
+                    //一般dialtion_h为 1，
+                    //这里input_row取值从-pad_h到output_h+pad_h，多个通道依次排放，每个通道从上到下从左到右以卷积核为基本单元展开写进内存中
                     int input_row = -pad_h + kernel_row * dilation_h;
                     
                     for (int output_rows = output_h; output_rows; output_rows--)
                     {
+                        //padding
                         if (!is_a_ge_zero_and_a_lt_b (input_row, height))
                         {
                             for (int output_cols = output_w; output_cols; output_cols--)

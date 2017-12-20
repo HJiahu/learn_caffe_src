@@ -40,6 +40,7 @@ namespace caffe
              * @brief Run Forward and return the result.
              *
              */
+            //loss将保存最终输出的损失值
             const vector<Blob<Dtype>*>& Forward (Dtype* loss = NULL);
             /// @brief DEPRECATED; use Forward() instead.
             const vector<Blob<Dtype>*>& ForwardPrefilled (Dtype* loss = NULL)
@@ -174,6 +175,7 @@ namespace caffe
                 CHECK_LT (i, bottom_id_vecs_.size()) << "Invalid layer id";
                 return bottom_id_vecs_[i];
             }
+            //返回的是向量，可以判断哪些层需要反向传输
             inline const vector<vector<bool> >& bottom_need_backward() const
             {
                 return bottom_need_backward_;

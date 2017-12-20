@@ -34,13 +34,11 @@ namespace caffe
             // Helper functions that abstract away the column buffer and gemm arguments.
             // The last argument in forward_cpu_gemm is so that we can skip the im2col if
             // we just called weight_cpu_gemm with the same input.
-            void forward_cpu_gemm (const Dtype* input, const Dtype* weights,
-                                   Dtype* output, bool skip_im2col = false);
+			// gemm的全称是：General Matrix Matrix Multiply，是矩阵相乘的运算
+            void forward_cpu_gemm (const Dtype* input, const Dtype* weights,  Dtype* output, bool skip_im2col = false);
             void forward_cpu_bias (Dtype* output, const Dtype* bias);
-            void backward_cpu_gemm (const Dtype* input, const Dtype* weights,
-                                    Dtype* output);
-            void weight_cpu_gemm (const Dtype* input, const Dtype* output, Dtype*
-                                  weights);
+            void backward_cpu_gemm (const Dtype* input, const Dtype* weights, Dtype* output);
+            void weight_cpu_gemm (const Dtype* input, const Dtype* output, Dtype* weights);
             void backward_cpu_bias (Dtype* bias, const Dtype* input);
             
 #ifndef CPU_ONLY
@@ -98,6 +96,9 @@ namespace caffe
             
         private:
             // wrap im2col/col2im so we don't have to remember the (long) argument lists
+			// 下面两个函数是caffe中计算卷积的辅助函数，分别将图片转化为矩阵和其逆运算
+			// 这样可以使得整个一层的卷积运算可以一次计算完成
+			// 具体解释可以参考：
             inline void conv_im2col_cpu (const Dtype* data, Dtype* col_buff)
             {
                 if (!force_nd_im2col_ && num_spatial_axes_ == 2)

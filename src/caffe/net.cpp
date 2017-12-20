@@ -107,7 +107,7 @@ namespace caffe
                     << "Creating Layer " << layer_param.name();
             bool need_backward = false;
             
-			//HJiahu 2017/12/09:16:09
+            //HJiahu 2017/12/09:16:09
             // Figure out this layer's input and output
             for (int bottom_id = 0; bottom_id < layer_param.bottom_size(); ++bottom_id)
             {
@@ -345,6 +345,17 @@ namespace caffe
         ShareWeights();
         debug_info_ = param.debug_info();
         LOG_IF (INFO, Caffe::root_solver()) << "Network initialization done.";
+        //unsigned int params_cnt = 0;
+        //
+        //for (auto ptr : layers_)
+        //{
+        //    for (auto p : ptr->blobs())
+        //    {
+        //        params_cnt += ( (*p).count (0));
+        //    }
+        //}
+        //
+        //std::cout << params_cnt * sizeof (Dtype) / (1024) << std::endl;
     } //end of Init function
     
     

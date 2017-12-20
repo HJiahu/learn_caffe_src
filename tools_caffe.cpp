@@ -240,13 +240,13 @@ int train()
     auto snapshot_jh = FLAGS_snapshot;
     CHECK (!FLAGS_snapshot.size() || !FLAGS_weights.size())
             << "Give a snapshot to resume training or weights to finetune but not both.";
-	//stages 一般是用户自定义的，用于对网络进行重构，具体可参考：http://caffecn.cn/?/question/104
+    //stages 一般是用户自定义的，用于对网络进行重构，具体可参考：http://caffecn.cn/?/question/104
     vector<string> stages = get_stages_from_flags();
     //从solver文件中读取solver信息到指定的对象中
     caffe::SolverParameter solver_param;
     auto slover_jh = FLAGS_solver;//"I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt"
     caffe::ReadSolverParamsFromTextFileOrDie (FLAGS_solver, &solver_param);
-	//FLAGS_level与stages的功能相似，一般是用户自定义的，用于对网络进行重构，具体可参考：http://caffecn.cn/?/question/104
+    //FLAGS_level与stages的功能相似，一般是用户自定义的，用于对网络进行重构（不同的条件使用不同的网络），具体可参考：http://caffecn.cn/?/question/104
     auto level_jh = FLAGS_level;//一般而言初学caffe时是不会用到FLAGS_level和stages这两个参数的
     solver_param.mutable_train_state()->set_level (FLAGS_level);
     
@@ -311,17 +311,18 @@ int train()
         Caffe::set_mode (Caffe::GPU);
         Caffe::set_solver_count (gpus.size());
     }
+    
     //Caffe在train或者test的过程中都有可能会遇到系统信号(用户按下ctrl+c或者关掉了控制的terminal)
-	//我们可以通过对sigint_effect和sighup_effect来设置遇到系统信号的时候希望进行的处理方式
-	//如果用户不设定(大部分时候我自己就没设定)，sigint的默认值为”stop”，sighup的默认值为”snapshot”。
-	//参考：http://blog.csdn.net/junmuzi/article/details/52619585?locationNum=9
+    //我们可以通过对sigint_effect和sighup_effect来设置遇到系统信号的时候希望进行的处理方式
+    //如果用户不设定(大部分时候我自己就没设定)，sigint的默认值为”stop”，sighup的默认值为”snapshot”。
+    //参考：http://blog.csdn.net/junmuzi/article/details/52619585?locationNum=9
     caffe::SignalHandler signal_handler (GetRequestedAction (FLAGS_sigint_effect), GetRequestedAction (FLAGS_sighup_effect));
     //创建 solver 并初始化网络
     shared_ptr<caffe::Solver<float> >  solver (caffe::SolverRegistry<float>::CreateSolver (solver_param));
     solver->SetActionFunction (signal_handler.GetActionFunction());
     //auto &snapshot_jh = FLAGS_snapshot;
     
-	//是否从已有的模型开始训练（fine tuning）
+    //是否从已有的模型开始训练（fine tuning）
     if (FLAGS_snapshot.size())
     {
         LOG (INFO) << "Resuming from " << FLAGS_snapshot;
@@ -571,12 +572,29 @@ int main (int argc, char** argv)
     //至少在vs2015中调试代码时argc与argv依旧可用此时argc==1
     if (argc == 1)
     {
+        //caffe test -model .\lenet_train_test.prototxt -weights .\lenet_iter_20000.caffemodel -iterations 100
         //修改argc和argv，在函数内部提供参数，便于调试
         //指令形式：caffe train -solver ./*solver.prototxt
+        //#define USE_CIFAR10
+#define USE_LENET
+#ifdef USE_CIFAR10
+        char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/cifar10_model/cifar10_full_solver.prototxt";
+#elif defined(USE_LENET)
         char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt";
+#endif
+#define TRAIN
+//#define TEST
+#ifdef TRAIN
         char * (command_vec[]) = { "caffe", "train", "-solver", solver_file_path };
         argc = 4;
         argv = command_vec;
+#elif defined(TEST) // TRAIN
+        char* model_path = R"(D:\age_gender\deepid\gender/deploy.prototxt)";
+        char* trained_path = R"(D:\age_gender\deepid\gender/model.caffemodel)";
+        char* (command_vec[]) = { "caffe", "test", "-model", model_path, "-weights", trained_path, "-iterations", "100" };
+        argc = 8;
+        argv = command_vec;
+#endif
     }
     
     // Print output to stderr (while still logging).

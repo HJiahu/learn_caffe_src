@@ -69,12 +69,13 @@ namespace caffe
         InsertSplits (filtered_param, &param);
         // Basically, build all the layers and set up their connections.
         name_ = param.name();
-        map<string, int> blob_name_to_idx;
-        set<string> available_blobs;
+        map<string, int> blob_name_to_idx;//这里保存了blob名和其索引的对应关心
+        set<string> available_blobs;//保存可用的blob名
         memory_used_ = 0;
         // For each layer, set up its input and output
         // layer_size 返回的是这个网络中有多少层（多少个 layer ），一般每个层都有两个blob（bottom和top）
         // 在网络文件中定义的可以共享的层通过InsertSplits处理之后会添加新的层（splitlayer）信息到param中
+		// 下面的几个变量都是二维的，第一维对应网络层，第二维对应层中的blob（bottom&top），不是内部的w&b
         bottom_vecs_.resize (param.layer_size());
         top_vecs_.resize (param.layer_size());
         bottom_id_vecs_.resize (param.layer_size());
@@ -93,7 +94,7 @@ namespace caffe
             // Setup layer.
             const LayerParameter& layer_param = param.layer (layer_id);
             
-            //用于判断反向传播层数的正误
+            // 用于判断反向传播层数的正误
             if (layer_param.propagate_down_size() > 0)
             {
                 CHECK_EQ (layer_param.propagate_down_size(), layer_param.bottom_size())
@@ -107,18 +108,18 @@ namespace caffe
                     << "Creating Layer " << layer_param.name();
             bool need_backward = false;
             
-            //HJiahu 2017/12/09:16:09
             // Figure out this layer's input and output
+            // 对于网络的第一层数据层而言layer_param.bottom_size()==0所以不会执行下面的循环
             for (int bottom_id = 0; bottom_id < layer_param.bottom_size(); ++bottom_id)
             {
-                const int blob_id = AppendBottom (param, layer_id, bottom_id,
-                                                  &available_blobs, &blob_name_to_idx);
+                const int blob_id = AppendBottom (param, layer_id, bottom_id, &available_blobs, &blob_name_to_idx);
                 // If a blob needs backward, this layer should provide it.
                 need_backward |= blob_need_backward_[blob_id];
             }
             
             int num_top = layer_param.top_size();
             
+            // 因为数据层有top所以，下面的循环会将数据层的top写进available_blobs中，随后对每个层进行处理
             for (int top_id = 0; top_id < num_top; ++top_id)
             {
                 AppendTop (param, layer_id, top_id, &available_blobs, &blob_name_to_idx);
@@ -163,8 +164,7 @@ namespace caffe
                 }
                 
                 blob_loss_weights_[top_id_vecs_[layer_id][top_id]] = layer->loss (top_id);
-                LOG_IF (INFO, Caffe::root_solver())
-                        << "Top shape: " << top_vecs_[layer_id][top_id]->shape_string();
+                LOG_IF (INFO, Caffe::root_solver()) << "Top shape: " << top_vecs_[layer_id][top_id]->shape_string();
                         
                 if (layer->loss (top_id))
                 {
@@ -545,12 +545,15 @@ namespace caffe
     
     // Helper for Net::Init: add a new bottom blob to the net.
     template <typename Dtype>
-    int Net<Dtype>::AppendBottom (const NetParameter& param, const int layer_id,
-                                  const int bottom_id, set<string>* available_blobs,
-                                  map<string, int>* blob_name_to_idx)
+    int Net<Dtype>::AppendBottom (const NetParameter& param,
+                                  const int layer_id,//当前层的ID
+                                  const int bottom_id,//当前层对应blob的ID
+                                  set<string>* available_blobs,//保存到目前为止可用的层
+                                  map<string, int>* blob_name_to_idx//保存目前位置可用层与其索引
+                                 )
     {
         const LayerParameter& layer_param = param.layer (layer_id);
-        const string& blob_name = layer_param.bottom (bottom_id);
+        const string& blob_name = layer_param.bottom (bottom_id);//获得当前层对应 bottom 的名称
         
         if (available_blobs->find (blob_name) == available_blobs->end())
         {
@@ -559,11 +562,10 @@ namespace caffe
         }
         
         const int blob_id = (*blob_name_to_idx) [blob_name];
-        LOG_IF (INFO, Caffe::root_solver())
-                << layer_names_[layer_id] << " <- " << blob_name;
+        LOG_IF (INFO, Caffe::root_solver()) << layer_names_[layer_id] << " <- " << blob_name;
         bottom_vecs_[layer_id].push_back (blobs_[blob_id].get());
         bottom_id_vecs_[layer_id].push_back (blob_id);
-        available_blobs->erase (blob_name);
+        available_blobs->erase (blob_name);//caffe中会自动添加split层，所以处理后的网络参数中层与层之间是一一对应的
         bool need_backward = blob_need_backward_[blob_id];
         
         // Check if the backpropagation on bottom_id should be skipped

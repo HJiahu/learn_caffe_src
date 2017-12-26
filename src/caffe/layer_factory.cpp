@@ -55,8 +55,7 @@ namespace caffe
     
     // Get a layer using a LayerParameter.
     template <typename Dtype>
-    shared_ptr<Layer<Dtype> > LayerRegistry<Dtype>::CreateLayer (
-        const LayerParameter& param)
+    shared_ptr<Layer<Dtype> > LayerRegistry<Dtype>::CreateLayer (const LayerParameter& param)
     {
         if (Caffe::root_solver())
         {

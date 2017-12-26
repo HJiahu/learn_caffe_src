@@ -60,7 +60,7 @@ namespace caffe
             typedef shared_ptr<Layer<Dtype> > (*Creator) (const LayerParameter&);
             typedef std::map<string, Creator> CreatorRegistry;
             
-            static CreatorRegistry& Registry();
+            static CreatorRegistry& Registry();//这里的单例模式与以前所见的不同，使用函数内static变量的特点来实现单例
             
             // Adds a creator.
             static void AddCreator (const string& type, Creator creator);

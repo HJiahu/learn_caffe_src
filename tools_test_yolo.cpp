@@ -1,8 +1,6 @@
 //#define READ_THIS_FILE
 #ifdef READ_THIS_FILE
 
-
-
 #include <gflags/gflags.h>
 #include <glog/logging.h>
 

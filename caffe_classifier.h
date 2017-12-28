@@ -1,4 +1,4 @@
-#ifndef CAFFE_CLASSFIER_H_
+ï»¿#ifndef CAFFE_CLASSFIER_H_
 #define CAFFE_CLASSFIER_H_
 
 //this header is create by HJiahu based on caffe\examples\cpp_classification\classification.cpp
@@ -21,8 +21,9 @@ inline std::ostream& operator<< (std::ostream& out, const Prediction&pred)
     out << "[" << pred.first << ", " << pred.second * 100.0 << "%]";
     return out;
 }
-static bool PairCompare (const std::pair<float, int>& lhs,
-                         const std::pair<float, int>& rhs);
+
+//é€šè¿‡æ¯”è¾ƒç¬¬ä¸€ä¸ªå‚æ•°æ¯”è¾ƒä¸¤ä¸ªpairçš„å¤§å°
+static bool PairCompare (const std::pair<float, int>& lhs, const std::pair<float, int>& rhs);
 /* Return the indices of the top N values of vector v. */
 static std::vector<int> Argmax (const std::vector<float>& v, int N);
 
@@ -36,7 +37,7 @@ class Classifier
                     const string& trained_file,
                     const string& mean_file,
                     const string& label_file);
-        //Ê¹ÓÃÔ¼¶¨µÄ·½Ê½À´³õÊ¼»¯classifier£¬¹æ¶¨ÎÄ¼ş¼ĞÄÚÎÄ¼şÃüÃû·½Ê½ÈçÏÂ£º
+        //ä½¿ç”¨çº¦å®šçš„æ–¹å¼æ¥åˆå§‹åŒ–classifierï¼Œè§„å®šæ–‡ä»¶å¤¹å†…æ–‡ä»¶å‘½åæ–¹å¼å¦‚ä¸‹ï¼š
         //model_file   :deploy.prototxt
         //trained_file :model.caffemodel
         //mean_file    :mean.binaryproto
@@ -68,8 +69,7 @@ class Classifier
         std::vector<string> labels_;
 };
 
-inline bool PairCompare (const std::pair<float, int>& lhs,
-                         const std::pair<float, int>& rhs)
+inline bool PairCompare (const std::pair<float, int>& lhs,const std::pair<float, int>& rhs)
 {
     return lhs.first > rhs.first;
 }

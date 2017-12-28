@@ -1,4 +1,4 @@
-#include"caffe_classifier.h"
+ï»¿#include"caffe_classifier.h"
 #include <caffe/caffe.hpp>
 
 //this file is create by HJiahu based on caffe\examples\cpp_classification\classification.cpp
@@ -99,7 +99,7 @@ Classifier::Classifier (const string& cnn_model_path)
     string mean_file = cnn_model_path + suffix + "mean.binaryproto";
     string label_file = cnn_model_path + suffix + "label.txt";
     Classifier (deploy_file, model_file, mean_file, label_file);
-    //¿ÉÒÔÊ¹ÓÃ¹¹Ôìº¯ÊıÎ¯ÍĞ
+    //å¯ä»¥ä½¿ç”¨æ„é€ å‡½æ•°å§”æ‰˜
     *this = Classifier (deploy_file, model_file, mean_file, label_file);
 }
 

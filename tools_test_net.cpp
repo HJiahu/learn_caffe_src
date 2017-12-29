@@ -1,4 +1,4 @@
-#define USE_THIS_FILE
+//#define USE_THIS_FILE
 #ifdef USE_THIS_FILE
 #include<caffe/caffe.hpp>
 
@@ -10,7 +10,7 @@ int main()
     std::string trained_model{ R"(I:\BaiduNetdiskDownload\gnet_yolo_iter_32000.caffemodel)" };
     Net<float> caffe_net (model_prototxt_path, caffe::TEST);
     caffe_net.CopyTrainedLayersFrom (trained_model);
-	caffe_net.Forward();
+    caffe_net.Forward();
 #ifdef _MSC_VER
     system ("pause");
 #endif // _MSC_VER

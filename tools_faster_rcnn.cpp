@@ -1,4 +1,4 @@
-#define READ_THIS_FILE
+//#define READ_THIS_FILE
 #ifdef READ_THIS_FILE
 
 #include "boost/algorithm/string.hpp"

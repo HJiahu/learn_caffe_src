@@ -13,31 +13,34 @@
 #include "caffe/FRCNN/util/frcnn_param.hpp"
 #include "caffe/FRCNN/util/frcnn_helper.hpp"
 
-namespace FRCNN_API{
+namespace FRCNN_API
+{
 
-using std::vector;
-using caffe::Blob;
-using caffe::Net;
-using caffe::Frcnn::FrcnnParam;
-using caffe::Frcnn::Point4f;
-using caffe::Frcnn::BBox;
-
-class Detector {
-public:
-  Detector(std::string &proto_file, std::string &model_file){
-    Set_Model(proto_file, model_file);
-  }
-  void Set_Model(std::string &proto_file, std::string &model_file);
-  void predict(const cv::Mat &img_in, vector<BBox<float> > &results);
-  void predict_original(const cv::Mat &img_in, vector<BBox<float> > &results);
-  void predict_iterative(const cv::Mat &img_in, vector<BBox<float> > &results);
-private:
-  void preprocess(const cv::Mat &img_in, const int blob_idx);
-  void preprocess(const vector<float> &data, const int blob_idx);
-  vector<boost::shared_ptr<Blob<float> > > predict(const vector<std::string> blob_names);
-  boost::shared_ptr<Net<float> > net_;
-  float mean_[3];
-  int roi_pool_layer;
-};
-
+    using std::vector;
+    using caffe::Blob;
+    using caffe::Net;
+    using caffe::Frcnn::FrcnnParam;
+    using caffe::Frcnn::Point4f;
+    using caffe::Frcnn::BBox;
+    
+    class Detector
+    {
+        public:
+            Detector (std::string &proto_file, std::string &model_file)
+            {
+                Set_Model (proto_file, model_file);
+            }
+            void Set_Model (std::string &proto_file, std::string &model_file);
+            void predict (const cv::Mat &img_in, vector<BBox<float> > &results);
+            void predict_original (const cv::Mat &img_in, vector<BBox<float> > &results);
+            void predict_iterative (const cv::Mat &img_in, vector<BBox<float> > &results);
+        private:
+            void preprocess (const cv::Mat &img_in, const int blob_idx);
+            void preprocess (const vector<float> &data, const int blob_idx);
+            vector<boost::shared_ptr<Blob<float> > > predict (const vector<std::string> blob_names);
+            boost::shared_ptr<Net<float> > net_;
+            float mean_[3];
+            int roi_pool_layer;
+    };
+    
 }

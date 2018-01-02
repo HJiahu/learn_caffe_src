@@ -11,8 +11,7 @@ namespace caffe
     void SoftmaxLayer<Dtype>::Reshape (const vector<Blob<Dtype>*>& bottom,
                                        const vector<Blob<Dtype>*>& top)
     {
-        softmax_axis_ =
-            bottom[0]->CanonicalAxisIndex (this->layer_param_.softmax_param().axis());
+        softmax_axis_ = bottom[0]->CanonicalAxisIndex (this->layer_param_.softmax_param().axis());
         top[0]->ReshapeLike (*bottom[0]);
         vector<int> mult_dims (1, bottom[0]->shape (softmax_axis_));
         sum_multiplier_.Reshape (mult_dims);
@@ -25,13 +24,15 @@ namespace caffe
         scale_.Reshape (scale_dims);
     }
     
+	// softmaxlayer和withloss的区别应该是后者添加了一个loss函数，用于训练，前者用于TEST
+	// http://freemind.pluskid.org/machine-learning/softmax-vs-softmax-loss-numerical-stability/
     template <typename Dtype>
     void SoftmaxLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom,
                                            const vector<Blob<Dtype>*>& top)
     {
         const Dtype* bottom_data = bottom[0]->cpu_data();
         Dtype* top_data = top[0]->mutable_cpu_data();
-        Dtype* scale_data = scale_.mutable_cpu_data();
+        Dtype* scale_data = scale_.mutable_cpu_data();//scale is an intermediate Blob to hold temporary results.
         int channels = bottom[0]->shape (softmax_axis_);
         int dim = bottom[0]->count() / outer_num_;
         caffe_copy (bottom[0]->count(), bottom_data, top_data);

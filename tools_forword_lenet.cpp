@@ -1,4 +1,4 @@
-//#define READ_THIS_FILE
+#define READ_THIS_FILE
 #ifdef READ_THIS_FILE
 
 /*这个文件是我自己加的，随机生成一张数字图并使用训练好的lenet网络进行预测，可以使用当前文件实现caffe forward的单步调试*/

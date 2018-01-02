@@ -317,8 +317,8 @@ namespace caffe
             shared_ptr<SyncedMemory> shape_data_;
             //四个元素，number N x channel K x height H x width W.
             vector<int> shape_;
-            int count_;
-            int capacity_;
+            int count_;//count_表示Blob中的元素个数，也就是个数*通道数*高度*宽度
+            int capacity_;//capacity表示当前的元素个数，因为Blob可能会reshape。
             
             DISABLE_COPY_AND_ASSIGN (Blob);
     };  // class Blob

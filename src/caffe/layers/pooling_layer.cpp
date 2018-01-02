@@ -174,13 +174,13 @@ namespace caffe
     // TODO(Yangqing): Is there a faster way to do pooling in the channel-first
     // case?
     template <typename Dtype>
-    void PoolingLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom,
-                                           const vector<Blob<Dtype>*>& top)
+    void PoolingLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
         const Dtype* bottom_data = bottom[0]->cpu_data();
         Dtype* top_data = top[0]->mutable_cpu_data();
         const int top_count = top[0]->count();
         // We'll output the mask to top[1] if it's of size >1.
+        // 如果top.size() > 1，则额外输出一个mask的Blob到top[1]
         const bool use_top_mask = top.size() > 1;
         int* mask = NULL;  // suppress warnings about uninitalized variables
         Dtype* top_mask = NULL;
@@ -209,7 +209,7 @@ namespace caffe
                 // The main loop
                 for (int n = 0; n < bottom[0]->num(); ++n)
                 {
-                    for (int c = 0; c < channels_; ++c)
+                    for (int c = 0; c < channels_; ++c) //这里的通道指的是卷积核（或者 feature map）的个数
                     {
                         for (int ph = 0; ph < pooled_height_; ++ph)
                         {
@@ -267,12 +267,12 @@ namespace caffe
                 break;
                 
             case PoolingParameter_PoolMethod_AVE:
-                for (int i = 0; i < top_count; ++i)
+                for (int i = 0; i < top_count; ++i) //内存置为0
                 {
                     top_data[i] = 0;
                 }
                 
-                // The main loop
+                // The main loop，num()返回的是blob中第一维的大小，一般就是batch size的大小，对卷积层而言指的是卷积核的个数
                 for (int n = 0; n < bottom[0]->num(); ++n)
                 {
                     for (int c = 0; c < channels_; ++c)

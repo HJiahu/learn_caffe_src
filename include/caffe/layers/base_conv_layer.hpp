@@ -21,10 +21,8 @@ namespace caffe
         public:
             explicit BaseConvolutionLayer (const LayerParameter& param)
                 : Layer<Dtype> (param) {}
-            virtual void LayerSetUp (const vector<Blob<Dtype>*>& bottom,
-                                     const vector<Blob<Dtype>*>& top);
-            virtual void Reshape (const vector<Blob<Dtype>*>& bottom,
-                                  const vector<Blob<Dtype>*>& top);
+            virtual void LayerSetUp (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
+            virtual void Reshape (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
                                   
             virtual inline int MinBottomBlobs() const { return 1; }
             virtual inline int MinTopBlobs() const { return 1; }

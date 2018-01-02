@@ -105,9 +105,10 @@ namespace caffe
     }
     
     template <typename Dtype>
-    void InnerProductLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom,
-            const vector<Blob<Dtype>*>& top)
+    void InnerProductLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
+        // 以cifar10为例，其倒数第二层为全连接层，且top为10个元素，bottom的size为(1,64,4,4)
+		// cifar10的权值size为(10，1024)，而1*64*4*4 = 1024，即输入层的每一个元素都与输出层相连
         const Dtype* bottom_data = bottom[0]->cpu_data();
         Dtype* top_data = top[0]->mutable_cpu_data();
         const Dtype* weight = this->blobs_[0]->cpu_data();

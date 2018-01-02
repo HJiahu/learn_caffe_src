@@ -1,4 +1,4 @@
-#define USE_THIS_FILE
+//#define USE_THIS_FILE
 #ifdef USE_THIS_FILE
 #include "my_configs.h"
 #include "caffe_classifier.h"

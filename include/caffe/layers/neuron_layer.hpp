@@ -16,14 +16,14 @@ namespace caffe
      *        each element of the output depends only on the corresponding input
      *        element.
      */
+	//激活函数层，或者说神经元层，输入层与输出层有相同的size
     template <typename Dtype>
     class NeuronLayer : public Layer<Dtype>
     {
         public:
             explicit NeuronLayer (const LayerParameter& param)
                 : Layer<Dtype> (param) {}
-            virtual void Reshape (const vector<Blob<Dtype>*>& bottom,
-                                  const vector<Blob<Dtype>*>& top);
+            virtual void Reshape (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top);
                                   
             virtual inline int ExactNumBottomBlobs() const { return 1; }
             virtual inline int ExactNumTopBlobs() const { return 1; }

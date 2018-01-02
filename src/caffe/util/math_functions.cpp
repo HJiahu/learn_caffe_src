@@ -70,7 +70,8 @@ namespace caffe
     template <>
     void caffe_axpy<double> (const int N, const double alpha, const double* X,
                              double* Y) { cblas_daxpy (N, alpha, X, 1, Y, 1); }
-                             
+                            
+	//置内存块中变量的值
     template <typename Dtype>
     void caffe_set (const int N, const Dtype alpha, Dtype* Y)
     {

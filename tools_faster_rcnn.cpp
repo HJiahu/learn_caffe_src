@@ -12,19 +12,24 @@
 #include "caffe/util/signal_handler.h"
 #include "caffe/FRCNN/util/frcnn_vis.hpp"
 #include "caffe/FRCNN/api/api.hpp"
+#include "my_configs.h"
 
 int main (int argc, char** argv)
 {
     caffe::Caffe::set_mode (caffe::Caffe::CPU);
-    std::string proto_file = R"(I:\learn_caffe\learn_caffe\caffe_src\faster_rcnn_model\vgg16_with_RPN_test.proto)";
+    std::string proto_file = (root_path_g / "faster_rcnn_model/vgg16_with_RPN_test.proto").string();
     std::string model_file = R"(D:\Programs\caffe_deps\caffe_VS2015x64DCPU\bin\VGG16_faster_rcnn_final.caffemodel)";
-    std::string default_config_file = R"(I:\learn_caffe\learn_caffe\caffe_src\faster_rcnn_model\frcnn_config\default_config.json)";
+    std::string default_config_file = (root_path_g / "faster_rcnn_model/frcnn_config/default_config.json").string();
     API::Set_Config (default_config_file);
     API::Detector detector (proto_file, model_file);
     std::vector<caffe::Frcnn::BBox<float> > results;
     caffe::Timer time_;
-    cv::Mat image = cv::imread (R"(I:\learn_caffe\learn_caffe\caffe_src\faster_rcnn_model\frcnn_config\test_images\004545.jpg)");
+    cv::Mat image = cv::imread ( (root_path_g / "faster_rcnn_model/frcnn_config/test_images/004545.jpg").string());
+    caffe::CPUTimer timer;
+    timer.Start();
+    std::cout << "******************** Predicting begin: " << std::endl;
     detector.predict (image, results);
+    std::cout << "******************** Milliseconds for one predict: " << timer.MilliSeconds() << std::endl;
     
     for (size_t obj = 0; obj < results.size(); obj++)
     {

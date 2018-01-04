@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 #include "tools_config.h"
 #ifdef TOOLS_TEST_YOLO_CPP
+=======
+//#define READ_THIS_FILE
+#ifdef READ_THIS_FILE
+>>>>>>> 0d0d59daf845ecd263ed90aebb61ba59a26ddaec
 
 #include <gflags/gflags.h>
 #include <glog/logging.h>

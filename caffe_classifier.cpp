@@ -199,7 +199,11 @@ void Classifier::Preprocess (const cv::Mat& img, std::vector<cv::Mat>* input_cha
     /* Convert the input image to the input image format of the network. */
     cv::Mat sample;
     
+<<<<<<< HEAD
 	//图片格式的转化，确定sample要么灰度要么BGR图像
+=======
+    //图片格式的转化，确定sample要么灰度要么BGR图像
+>>>>>>> 0d0d59daf845ecd263ed90aebb61ba59a26ddaec
     if (img.channels() == 3 && num_channels_ == 1)
     {
         cv::cvtColor (img, sample, cv::COLOR_BGR2GRAY);

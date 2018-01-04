@@ -1,0 +1,571 @@
+
+name: "shufflenet"
+ 
+input: "data"
+input_shape { 
+  dim: 1
+  dim: 3
+  dim: 48
+  dim: 48
+}
+######################### layer ###############
+layer {
+  name: "conv1"
+  type: "Convolution"
+  bottom: "data"
+  top: "conv1"
+  convolution_param {
+    num_output: 30
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    group : 3
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+
+layer {
+  name: "conv1_bn"
+  type: "BatchNorm"
+  bottom: "conv1"
+  top: "conv1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "conv1_scale"
+  bottom: "conv1"
+  top: "conv1"
+  type: "Scale"
+  scale_param {
+    filler {
+      value: 1
+    }
+    bias_term: true
+    bias_filler {
+      value: 0
+    }
+  }
+}
+layer {
+  name: "conv1_relu"
+  type: "ReLU"
+  bottom: "conv1"
+  top: "conv1"
+}
+
+
+layer {
+  name: "resx2_match_conv"
+  type: "Pooling"
+  bottom: "conv1"
+  top: "resx2_match_conv"
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "shuffle1"
+  type: "ShuffleChannel"
+  bottom: "conv1"
+  top: "shuffle1"
+  shuffle_channel_param {
+    group: 3
+  }
+}
+
+layer {
+  name: "resx2_conv2"
+  type: "Convolution"
+  bottom: "shuffle1"
+  top: "resx2_conv2"
+  convolution_param {
+    num_output: 30
+    kernel_size: 3
+    stride: 2
+    pad: 1
+    group: 6
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+
+layer {
+  name: "shuffle2"
+  type: "ShuffleChannel"
+  bottom: "resx2_conv2"
+  top: "shuffle2"
+  shuffle_channel_param {
+    group: 6
+  }
+}
+
+layer {
+  name: "resx2_conv4"
+  type: "Convolution"
+  bottom: "shuffle2"
+  top: "resx2_conv4"
+  convolution_param {
+    num_output: 30
+    kernel_size: 1
+    stride: 1
+    pad: 0
+    group: 5
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+layer {
+  name: "resx2_conv4_bn"
+  type: "BatchNorm"
+  bottom: "resx2_conv4"
+  top: "resx2_conv4"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "resx2_conv4_scale"
+  bottom: "resx2_conv4"
+  top: "resx2_conv4"
+  type: "Scale"
+  scale_param {
+    filler {
+      value: 1
+    }
+    bias_term: true
+    bias_filler {
+      value: 0
+    }
+  }
+}
+layer {
+  name: "resx2_conv4_relu"
+  type: "ReLU"
+  bottom: "resx2_conv4"
+  top: "resx2_conv4"
+}
+layer {
+  name: "resx2_concat"
+  type: "Concat"
+  bottom: "resx2_match_conv"
+  bottom: "resx2_conv4"
+  top: "resx2_concat"
+}
+
+layer {
+  name: "shuffle3"
+  type: "ShuffleChannel"
+  bottom: "resx2_concat"
+  top: "shuffle3"
+  shuffle_channel_param {
+    group: 5
+  }
+}
+layer {
+  name: "resx3_match_conv"
+  type: "Pooling"
+  bottom: "resx2_concat"
+  top: "resx3_match_conv"
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+
+layer {
+  name: "resx3_conv2"
+  type: "Convolution"
+  bottom: "shuffle3"
+  top: "resx3_conv2"
+  convolution_param {
+    num_output: 60
+    kernel_size: 3
+    stride: 2
+    pad: 1
+     group: 10
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+
+layer {
+  name: "shuffle4"
+  type: "ShuffleChannel"
+  bottom: "resx3_conv2"
+  top: "shuffle4"
+  shuffle_channel_param {
+    group: 10
+  }
+}
+
+layer {
+  name: "resx3_conv4"
+  type: "Convolution"
+  bottom: "shuffle4"
+  top: "resx3_conv4"
+  convolution_param {
+    num_output: 60
+    kernel_size: 1
+    stride: 1
+    pad: 0
+     group: 6
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+layer {
+  name: "resx3_conv4_bn"
+  type: "BatchNorm"
+  bottom: "resx3_conv4"
+  top: "resx3_conv4"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "resx3_conv4_scale"
+  bottom: "resx3_conv4"
+  top: "resx3_conv4"
+  type: "Scale"
+  scale_param {
+    filler {
+      value: 1
+    }
+    bias_term: true
+    bias_filler {
+      value: 0
+    }
+  }
+}
+layer {
+  name: "resx3_conv4_relu"
+  type: "ReLU"
+  bottom: "resx3_conv4"
+  top: "resx3_conv4"
+}
+
+layer {
+  name: "resx3_concat"
+  type: "Concat"
+  bottom: "resx3_match_conv"
+  bottom: "resx3_conv4"
+  top: "resx3_concat"
+}
+
+layer {
+  name: "resx4_match_conv"
+  type: "Pooling"
+  bottom: "resx3_concat"
+  top: "resx4_match_conv"
+  pooling_param {
+    pool: AVE
+    kernel_size: 3
+    stride: 2
+  }
+}
+layer {
+  name: "shuffle5"
+  type: "ShuffleChannel"
+  bottom: "resx3_concat"
+  top: "shuffle5"
+  shuffle_channel_param {
+    group: 6
+  }
+}
+
+layer {
+  name: "resx4_conv2"
+  type: "Convolution"
+  bottom: "shuffle5"
+  top: "resx4_conv2"
+  convolution_param {
+    num_output: 120
+    kernel_size: 3
+    stride: 2
+    pad: 1
+      group: 12
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+
+layer {
+  name: "shuffle6"
+  type: "ShuffleChannel"
+  bottom: "resx4_conv2"
+  top: "shuffle6"
+  shuffle_channel_param {
+    group: 12
+  }
+}
+
+layer {
+  name: "resx4_conv4"
+  type: "Convolution"
+  bottom: "shuffle6"
+  top: "resx4_conv4"
+  convolution_param {
+    num_output: 120
+    kernel_size: 1
+    stride: 1
+    pad: 0
+     group: 10
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+layer {
+  name: "resx4_conv4_bn"
+  type: "BatchNorm"
+  bottom: "resx4_conv4"
+  top: "resx4_conv4"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "resx4_conv4_scale"
+  bottom: "resx4_conv4"
+  top: "resx4_conv4"
+  type: "Scale"
+  scale_param {
+    filler {
+      value: 1
+    }
+    bias_term: true
+    bias_filler {
+      value: 0
+    }
+  }
+}
+layer {
+  name: "resx4_conv4_relu"
+  type: "ReLU"
+  bottom: "resx4_conv4"
+  top: "resx4_conv4"
+}
+
+layer {
+  name: "resx4_concat"
+  type: "Concat"
+  bottom: "resx4_match_conv"
+  bottom: "resx4_conv4"
+  top: "resx4_concat"
+}
+
+
+
+layer {
+  name: "resx5_conv1"
+  type: "Convolution"
+  bottom: "resx4_concat"
+  top: "resx5_conv1"
+  convolution_param {
+    num_output: 120
+    kernel_size: 3
+    stride: 3
+    pad: 0
+    group: 12
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+layer {
+  name: "resx5_conv1_bn"
+  type: "BatchNorm"
+  bottom: "resx5_conv1"
+  top: "resx5_conv1"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "resx5_conv1_scale"
+  bottom: "resx5_conv1"
+  top: "resx5_conv1"
+  type: "Scale"
+  scale_param {
+    filler {
+      value: 1
+    }
+    bias_term: true
+    bias_filler {
+      value: 0
+    }
+  }
+}
+layer {
+  name: "resx5_conv1_relu"
+  type: "ReLU"
+  bottom: "resx5_conv1"
+  top: "resx5_conv1"
+}
+
+
+layer {
+  name: "shuffle8"
+  type: "ShuffleChannel"
+  bottom: "resx5_conv1"
+  top: "shuffle8"
+  shuffle_channel_param {
+    group: 12
+  }
+}
+layer {
+  name: "resx5_conv3"
+  type: "Convolution"
+  bottom: "shuffle8"
+  top: "resx5_conv3"
+  convolution_param {
+    num_output: 120
+    kernel_size: 1
+    stride: 1
+    pad: 0
+    group: 10
+    bias_term: false
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+layer {
+  name: "resx5_conv3_bn"
+  type: "BatchNorm"
+  bottom: "resx5_conv3"
+  top: "resx5_conv3"
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+  param {
+    lr_mult: 0
+    decay_mult: 0
+  }
+}
+layer {
+  name: "resx5_conv3_scale"
+  bottom: "resx5_conv3"
+  top: "resx5_conv3"
+  type: "Scale"
+  scale_param {
+    filler {
+      value: 1
+    }
+    bias_term: true
+    bias_filler {
+      value: 0
+    }
+  }
+}
+layer {
+  name: "resx5_conv3_relu"
+  type: "ReLU"
+  bottom: "resx5_conv3"
+  top: "resx5_conv3"
+}
+#####################
+
+#####################
+
+layer {
+  name: "fc1000"
+  type: "Convolution"
+  bottom: "resx5_conv3"
+  top: "fc1000"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+    weight_filler {
+      type: "msra"
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "prob"
+  type: "Softmax"
+  bottom: "fc1000"
+  top: "prob"
+}

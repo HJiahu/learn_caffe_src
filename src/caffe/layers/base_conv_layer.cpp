@@ -10,9 +10,7 @@ namespace caffe
 {
 
     template <typename Dtype>
-    void BaseConvolutionLayer<Dtype>::LayerSetUp (
-        const vector<Blob<Dtype>*>& bottom,
-        const vector<Blob<Dtype>*>& top)
+    void BaseConvolutionLayer<Dtype>::LayerSetUp (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
         // Configure the kernel size, padding, stride, and inputs.
         ConvolutionParameter conv_param = this->layer_param_.convolution_param();
@@ -363,10 +361,17 @@ namespace caffe
         
         for (int g = 0; g < group_; ++g)
         {
-            caffe_cpu_gemm<Dtype> (CblasNoTrans, CblasNoTrans, conv_out_channels_ /
-                                   group_, conv_out_spatial_dim_, kernel_dim_,
-                                   (Dtype) 1., weights + weight_offset_ * g, col_buff + col_offset_ * g,
-                                   (Dtype) 0., output + output_offset_ * g);
+            //C=alpha*A*B+beta*C
+            caffe_cpu_gemm<Dtype> (CblasNoTrans, CblasNoTrans,//参加相乘的两个矩阵都不转置
+                                   conv_out_channels_ / group_,//结果矩阵的行数
+                                   conv_out_spatial_dim_,//结果矩阵的列数
+                                   kernel_dim_,//A*B，左边矩阵的列数（右边矩阵的行数）
+                                   (Dtype) 1.,//alpha
+                                   weights + weight_offset_ * g,//A
+                                   col_buff + col_offset_ * g,//B
+                                   (Dtype) 0.,//beta
+                                   output + output_offset_ * g//保存位置的起点，也是C的源
+                                  );
         }
     }
     

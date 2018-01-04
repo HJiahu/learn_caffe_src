@@ -18,6 +18,19 @@ namespace caffe
     {
         int lda = (TransA == CblasNoTrans) ? K : M;
         int ldb = (TransB == CblasNoTrans) ? N : K;
+		// 矩阵与矩阵的乘法，分为双精度的cblas_sgemm和单精度的cblas_sgemm两个函数的参数意义一样，只是类型不一样
+		/* C=alpha*A*B+beta*C 
+		cblas_sgemm(CblasRowMajor, //表示数组时行为主
+		            CblasNoTrans,  //A是否转置
+					CblasNoTrans,  //B是否转置
+					M,             //矩阵大小为(M*K)乘以(K*N)
+					N,
+					K,
+					alpha,
+					A, A的列数,
+					B,B的列数,
+					beta,
+					C,C的列数)	*/
         cblas_sgemm (CblasRowMajor, TransA, TransB, M, N, K, alpha, A, lda, B,
                      ldb, beta, C, N);
     }
@@ -57,7 +70,8 @@ namespace caffe
     template <>
     void caffe_axpy<double> (const int N, const double alpha, const double* X,
                              double* Y) { cblas_daxpy (N, alpha, X, 1, Y, 1); }
-                             
+                            
+	//置内存块中变量的值
     template <typename Dtype>
     void caffe_set (const int N, const Dtype alpha, Dtype* Y)
     {

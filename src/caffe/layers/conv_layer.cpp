@@ -28,11 +28,11 @@ namespace caffe
     template <typename Dtype>
     void ConvolutionLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
-        //以cifar10为例，blobs_[0]有2400个浮点数（即3*(32*(5*5))）
-        //top为(100,32,32,32)，这里的100为batch size，后面表示32个32*32的feature map，这说明32个卷积核在3通道图像上生成了32个feature map
-        //以lenet为例，blobs_[0]有500个浮点数（即1*(20*(5*5))）
-        //top为(100,20,24,24)，100为batch size，后面表示20个24*24的feature map，说明20个卷积核在灰度图中生成了20个feature map
-		//由上可知，无论彩色还是黑白，模型中指定多少个卷积核卷积层就输出多少个feature map，多通道时同一个核在多个通道上求平均成为一个激活函数输入变量
+        // 以cifar10为例，blobs_[0]有2400个浮点数（即3*(32*(5*5))），分析卷积层参数的个数需要考虑卷积核的权值共享
+        // top为(100,32,32,32)，这里的100为batch size，后面表示32个32*32的feature map，这说明32个卷积核在3通道图像上生成了32个feature map
+        // 以lenet为例，blobs_[0]有500个浮点数（即1*(20*(5*5))）
+        // top为(100,20,24,24)，100为batch size，后面表示20个24*24的feature map，说明20个卷积核在灰度图中生成了20个feature map
+        // 由上可知，无论彩色还是黑白，模型中指定多少个卷积核卷积层就输出多少个feature map，多通道时同一个核在多个通道上求平均成为一个激活函数输入变量
         const Dtype* weight = this->blobs_[0]->cpu_data();
         
         for (int i = 0; i < bottom.size(); ++i)

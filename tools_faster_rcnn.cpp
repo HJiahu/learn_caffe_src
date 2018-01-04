@@ -1,5 +1,11 @@
-//#define READ_THIS_FILE
-#ifdef READ_THIS_FILE
+/*
+	faster-rcnn中特殊的层有
+		FrcnnProposal
+		ROIPooling
+*/
+
+#include "tools_config.h"
+#ifdef TOOLS_FASTER_RCNN_CPP
 
 #include "boost/algorithm/string.hpp"
 #include "caffe/util/benchmark.hpp"

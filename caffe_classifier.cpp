@@ -163,8 +163,8 @@ void Classifier::SetMean (const string& mean_file)
 std::vector<float> Classifier::Predict (const cv::Mat& img)
 {
     Blob<float>* input_layer = static_cast<Net<float>*> (net_)->input_blobs() [0];
-    input_layer->Reshape (1, num_channels_,
-                          input_geometry_.height, input_geometry_.width);
+    //这里reshap的原因不清除，可能是为了便于处理
+    input_layer->Reshape (1, num_channels_, input_geometry_.height, input_geometry_.width);
     /* Forward dimension change to all layers. */
     static_cast<Net<float>*> (net_)->Reshape();
     std::vector<cv::Mat> input_channels;
@@ -183,22 +183,23 @@ void Classifier::WrapInputLayer (std::vector<cv::Mat>* input_channels)
     Blob<float>* input_layer = static_cast<Net<float>*> (net_)->input_blobs() [0];
     int width = input_layer->width();
     int height = input_layer->height();
-    float* input_data = input_layer->mutable_cpu_data();
+    float* input_data = input_layer->mutable_cpu_data();//blob内容的裸指针
     
     for (int i = 0; i < input_layer->channels(); ++i)
     {
+        //Mat的构造函数，使用已经存在的内存构造一个Mat
         cv::Mat channel (height, width, CV_32FC1, input_data);
         input_channels->push_back (channel);
         input_data += width * height;
     }
 }
 
-void Classifier::Preprocess (const cv::Mat& img,
-                             std::vector<cv::Mat>* input_channels)
+void Classifier::Preprocess (const cv::Mat& img, std::vector<cv::Mat>* input_channels)
 {
     /* Convert the input image to the input image format of the network. */
     cv::Mat sample;
     
+	//图片格式的转化，确定sample要么灰度要么BGR图像
     if (img.channels() == 3 && num_channels_ == 1)
     {
         cv::cvtColor (img, sample, cv::COLOR_BGR2GRAY);

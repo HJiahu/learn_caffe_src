@@ -1,5 +1,5 @@
-﻿//#define READ_THIS_FILE
-#ifdef  READ_THIS_FILE
+﻿#include "tools_config.h"
+#ifdef  TOOLS_EXTRACT_FEATURES_CPP
 #include <string>
 #include <vector>
 

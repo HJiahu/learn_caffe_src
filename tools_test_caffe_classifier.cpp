@@ -1,10 +1,6 @@
-<<<<<<< HEAD
+
 #include "tools_config.h"
 #ifdef TOOLS_TEST_CAFFE_CLASSIFIER_CPP
-=======
-//#define USE_THIS_TILE
-#ifdef USE_THIS_TILE
->>>>>>> 0d0d59daf845ecd263ed90aebb61ba59a26ddaec
 
 #include <string>
 #include <opencv2/opencv.hpp>

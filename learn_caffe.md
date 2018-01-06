@@ -290,6 +290,22 @@ caffe源码阅读杂记
 			optional int32 label = 5;//当前图像所对应的类型标签
 			repeated float float_data = 6;//保存特征信息的数组，一般是网络中层的数据（w&b）
 
+##### ConvolutionLayer(caffe卷积层实现原理)
+*	下面只说明我对caffe中卷积层的实现原理，具体的实现与注释请看源码。【[其他参考][21]】
+*	为了说明，这里以cifar10的网络来说明caffe中卷积层的实现方法（不使用lenet是因为其为单通道）
+*	caffe卷积层实现图例
+	*	<img src="images/caffe_conv_AB.jpg" style="width:700px" >
+		*	cifar10中conv1的参数为 `num_output`: 32 pad: 2 `kernel_size`: 5 stride: 1，上一层的参数为：(1,3,32,32)    
+		*	A对应卷积层中的权重矩阵，B是由输入图像（或输入feature map）通过caffe中的`im2col_cpu`函数转化后得到的矩阵，C是输出的feature map，方框边上的数字表示二维矩阵的宽与高
+		*	首先要明确一点，卷积层卷积核的个数与三个参数有关：输入层channel数、输出层channel数、`group_`值，`当前层卷积核的个数 = 输出channel数 * (输入channel数 / group_)`
+		*	group_的作用是将输入通道与输出通道分组，这样输出与输入是按组对应的，即某一组内的输出只与对应组的输入有关联。caffe中的分组很简单：输入层与输出层从上到下依次分为group组，然后从上到下组与组一一对应
+		*	ciafr10中conv1的group为1所以每个输出的feature map对应3个卷积核（因为输入层是一张图片的3个颜色通道），一共是`3*32 = 96`个卷积核，每个卷积核的长宽均为5，这96个卷积核一共有`96*5*5 = 2400`个参数，对应到上图中的A，A中一共有`32 * 3*5*5 = 2400`个参数 
+		*	再次强调一下，当group为1时对于每一个输出通道而言其与每一个输入通道都有一个对应的卷积核，这些卷积核都将在对应的输入通道中进行卷积运算，所有属于一个feature map的卷积核每滑动一次生成一个feature map中的一个像素点（对这些卷积核的输出求和就得到了一个标量）。以cifar10中conv1为例，B是75行，即上25行源自第一个通道，中间25行源自第二个通道，最后一行源自最后一个通道。B是1024列，因为每一个feature map都有1024个像素，即每一个卷积核都要滑动1024次。B的第一行是所有在第一个输入通道做卷积操作的卷积核的第一行的第一个元素对应在输入通道的像素，第二行是这些卷积核第一行的第二个元素对应在输入通道的像素...，当一个通道的卷积核滑动完成后就是下一个通道
+		*	C中的每一行都是一个feature map
+		*	具体参考可以看本节的[其他参考][21]，详细的细节可以看源码。没有图不好解释，所以这里只记录了我的一些理解。
+
+
+
 
 
 
@@ -429,3 +445,4 @@ caffe源码阅读杂记
 [18]:http://www.cnblogs.com/jiahu-Blog/p/7847043.html
 [19]:https://github.com/HJiahu/learn_caffe_src
 [20]:http://caffe.berkeleyvision.org/tutorial/solver.html
+[21]:http://blog.csdn.net/jiongnima/article/details/69055941

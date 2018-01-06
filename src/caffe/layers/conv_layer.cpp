@@ -14,13 +14,14 @@ namespace caffe
         const int* dilation_data = this->dilation_.cpu_data();
         this->output_shape_.clear();
         
-        for (int i = 0; i < this->num_spatial_axes_; ++i)
+        for (int i = 0; i < this->num_spatial_axes_; ++i) // num_spatial_axes_指的是卷积的维度，一般为2，即二维卷积
         {
             // i + 1 to skip channel axis
-            const int input_dim = this->input_shape (i + 1);
+            const int input_dim = this->input_shape (i + 1);// 每个通道中数据的维度，以图片为例即宽高
+            // 在这里进行卷积核的扩展操作
             const int kernel_extent = dilation_data[i] * (kernel_shape_data[i] - 1) + 1;
-            const int output_dim = (input_dim + 2 * pad_data[i] - kernel_extent)
-                                   / stride_data[i] + 1;
+            // 在这里计算卷积过后生成的blob的高和宽
+            const int output_dim = (input_dim + 2 * pad_data[i] - kernel_extent) / stride_data[i] + 1;
             this->output_shape_.push_back (output_dim);
         }
     }
@@ -28,11 +29,19 @@ namespace caffe
     template <typename Dtype>
     void ConvolutionLayer<Dtype>::Forward_cpu (const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
-        // 以cifar10为例，blobs_[0]有2400个浮点数（即3*(32*(5*5))），分析卷积层参数的个数需要考虑卷积核的权值共享
-        // top为(100,32,32,32)，这里的100为batch size，后面表示32个32*32的feature map，这说明32个卷积核在3通道图像上生成了32个feature map
-        // 以lenet为例，blobs_[0]有500个浮点数（即1*(20*(5*5))）
-        // top为(100,20,24,24)，100为batch size，后面表示20个24*24的feature map，说明20个卷积核在灰度图中生成了20个feature map
-        // 由上可知，无论彩色还是黑白，模型中指定多少个卷积核卷积层就输出多少个feature map，多通道时同一个核在多个通道上求平均成为一个激活函数输入变量
+        /*
+           因为lenet是单通道，shufflenet中有group所以以cifar10为例说明一些问题
+           以cifar10的conv1为例(   num_output: 32    pad: 2    kernel_size: 5    stride: 1)：
+        		bottom size: (1,3,32,32)   top size: (1,32,32,32)
+        		blobs_[0] size: (32,3,5,5)
+        
+           以cifar10的conv2为例(    num_output: 32    pad: 2    kernel_size: 5    stride: 1)
+        		bottom size: (1,32,16,16)   top size: (1,32,16,16)
+        		blobs_[0] size: (32,32,5,5)
+        
+        	从上面的数据可以得到（不考虑group_）：caffe中卷积核的个数并不一定与 num_output 相同，卷积核的个数为 输入channels*输出channels
+        	也就是每一个输出通道与每一个输入通道都有一个对应的卷积核
+        */
         const Dtype* weight = this->blobs_[0]->cpu_data();
         
         for (int i = 0; i < bottom.size(); ++i)

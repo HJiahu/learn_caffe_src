@@ -18,15 +18,10 @@ namespace caffe
         return static_cast<unsigned> (a) < static_cast<unsigned> (b);
     }
     
-    // 以RGB图像为例：
-    // data_col最高维为3，代表着每个通道的信息
-    // 设dilation_w为1，且padding的设置使得feature map大小与图像大小相同
-    // 那么下一维大小为height * width，即每一个点对应一个卷积核
-	// 再下一维大小为为kernel_h * kernel_w（参加卷积时对应位置原图的一个信息）
     template <typename Dtype>
     void im2col_cpu (const Dtype* data_im,//图片数据
                      const int channels,//图片的通道数
-                     const int height, const int width,//图片的几何信息
+                     const int height, const int width,//输入图片的几何信息
                      const int kernel_h, const int kernel_w,//卷积核的几何信息
                      const int pad_h, const int pad_w,//图像边缘的padding
                      const int stride_h, const int stride_w,//滑动步长
@@ -34,26 +29,29 @@ namespace caffe
                      Dtype* data_col//输出位置
                     )
     {
-        //输出矩阵的行数与宽数
+        // 输出矩阵（一个feature map）的行数与列数
         const int output_h = (height + 2 * pad_h - (dilation_h * (kernel_h - 1) + 1)) / stride_h + 1;
         const int output_w = (width + 2 * pad_w - (dilation_w * (kernel_w - 1) + 1)) / stride_w + 1;
-        const int channel_size = height * width;
+        const int channel_size = height * width;// 一个 feature map
         
         for (int channel = channels; channel--; data_im += channel_size) //通道
         {
+            // 每次处理同一通道中所有卷积核相同位置的点，data_col矩阵的每一行都与所有卷积核相同位置相关
             for (int kernel_row = 0; kernel_row < kernel_h; kernel_row++) //卷积核的行
             {
                 for (int kernel_col = 0; kernel_col < kernel_w; kernel_col++) //核的列
                 {
-                    // dilation_h这个变量是每隔多少个像素取值，比如dilation_h=2，图像下采样
+                    // dilation 的解释见：http://blog.csdn.net/jiongnima/article/details/69487519
                     // 一般dialtion_h为 1，
                     // 这里input_row取值从-pad_h到output_h+pad_h，多个通道依次排放，
                     // 每个通道从上到下从左到右以卷积核为基本单元展开写进内存中
+                    // 这个input_row指的是一个当前输入channel的行
                     int input_row = -pad_h + kernel_row * dilation_h;
                     
+                    // output_rows指的是输出位置即data_col矩阵的行，这个参数没有使用，只是用于确定循环的次数
                     for (int output_rows = output_h; output_rows; output_rows--)
                     {
-                        //首先判断将要写行位置是不是padding，如果是这些(#`O′)直接置0即可
+                        //首先判断将要写行位置是不是padding，如果是直接置0即可
                         if (!is_a_ge_zero_and_a_lt_b (input_row, height))
                         {
                             for (int output_cols = output_w; output_cols; output_cols--)

@@ -7,8 +7,8 @@ using namespace caffe;
 
 int main()
 {
-    std::string model_prototxt_path{R"(E:\libs\SqueezeNet\SqueezeNet_v1.1\deploy.prototxt)"};
-    std::string trained_model{ R"(E:\libs\SqueezeNet\SqueezeNet_v1.1\squeezenet_v1.1.caffemodel)" };
+    std::string model_prototxt_path{R"(I:\learn_caffe\learn_caffe\caffe_src\models\rfcn_model\ResNet-50-deploy.prototxt)"};
+    std::string trained_model{ R"(E:\CNN_Models\RFCN\rfcn_models_ResNet-50L\models\pre_trained_models\ResNet-50L\ResNet-50-model.caffemodel)" };
     Net<float> caffe_net (model_prototxt_path, caffe::TEST);
     caffe_net.CopyTrainedLayersFrom (trained_model);
     caffe_net.Forward();

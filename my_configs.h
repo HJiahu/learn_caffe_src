@@ -7,8 +7,10 @@ using Path = TinyPath::path;
 #ifdef _MSC_VER
 //所有代码和材料的根文件夹
 const Path root_path_g{ R"(I:\learn_caffe\learn_caffe\caffe_src)" };
+const Path model_root_path_g{R"(I:\learn_caffe\learn_caffe\caffe_src\models)"};
 #else
 const Path root_path_g { R"()" };
+const Path model_root_path_g{ R"()" };
 #endif // _MSC_VER
 
 

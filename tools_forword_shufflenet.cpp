@@ -8,8 +8,8 @@ using namespace std;
 
 int main()
 {
-    TinyPath::path shufflenet_path{root_path_g / "shufflenet_head_48x48_color"};
-    TinyPath::path img_path (root_path_g / "shufflenet_head_48x48_color/Mikasa.jpg");
+    TinyPath::path shufflenet_path{model_root_path_g / "shufflenet_head_48x48_color_model"};
+    TinyPath::path img_path (model_root_path_g / "shufflenet_head_48x48_color_model/Mikasa.jpg");
     cv::Mat img (cv::imread (img_path.string()));
     Classifier classifier (shufflenet_path.string());
     auto results = classifier.Classify (img);

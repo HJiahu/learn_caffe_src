@@ -17,14 +17,14 @@
 int main (int argc, char** argv)
 {
     caffe::Caffe::set_mode (caffe::Caffe::CPU);
-    std::string proto_file = (root_path_g / "faster_rcnn_model/vgg16_with_RPN_test.proto").string();
+    std::string proto_file = (model_root_path_g / "faster_rcnn_model/vgg16_with_RPN_test.proto").string();
     std::string model_file = R"(D:\Programs\caffe_deps\caffe_VS2015x64DCPU\bin\VGG16_faster_rcnn_final.caffemodel)";
-    std::string default_config_file = (root_path_g / "faster_rcnn_model/frcnn_config/default_config.json").string();
+    std::string default_config_file = (model_root_path_g / "faster_rcnn_model/frcnn_config/default_config.json").string();
     API::Set_Config (default_config_file);
     API::Detector detector (proto_file, model_file);
     std::vector<caffe::Frcnn::BBox<float> > results;
     caffe::Timer time_;
-    cv::Mat image = cv::imread ( (root_path_g / "faster_rcnn_model/frcnn_config/test_images/004545.jpg").string());
+    cv::Mat image = cv::imread ( (model_root_path_g / "faster_rcnn_model/frcnn_config/test_images/004545.jpg").string());
     caffe::CPUTimer timer;
     timer.Start();
     std::cout << "******************** Predicting begin: " << std::endl;

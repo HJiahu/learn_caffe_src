@@ -9,6 +9,7 @@
 #include <caffe/caffe.hpp>
 #include <memory>
 #include <string>
+#include "my_configs.h"
 using namespace caffe;
 using namespace std;
 
@@ -24,9 +25,9 @@ int main (int argc, char* argv[])
     ::google::InitGoogleLogging (argv[0]); //是否在终端显示网络的载入过程（注释后将显示所有信息到终端否则只显示错误）
     cout << "init ......" << endl;
     //网络结构文件
-    const string lenet_prototxt_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet.prototxt)");
+    const string lenet_prototxt_path ( (model_root_path_g / "lenet_model/lenet.prototxt").string());
     //训练好的网络模型，这个模型的准确度不高，6和7都会被误检
-    const string lenet_model_path (R"(I:\learn_caffe\learn_caffe\caffe_src\lenet_model\lenet_iter_20000.caffemodel)");
+    const string lenet_model_path ( (model_root_path_g / "lenet_model/lenet_iter_20000.caffemodel").string());
     typedef float type;
     //生成用于测试的图片，默认图像的大小为28*28（灰度图）
     auto data = generate_test_img (7, true);

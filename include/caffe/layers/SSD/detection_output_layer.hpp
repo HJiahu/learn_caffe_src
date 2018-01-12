@@ -15,7 +15,6 @@
 #include "caffe/layer.hpp"
 #include "caffe/proto/caffe.pb.h"
 #include "caffe/layers/SSD/bbox_util.hpp"
-//#include "caffe/util/bbox_util.hpp"
 
 using namespace boost::property_tree;  // NOLINT(build/namespaces)
 
@@ -92,6 +91,7 @@ namespace caffe
             
             float nms_threshold_;
             int top_k_;
+            float eta_;
             
             bool need_save_;
             string output_directory_;
@@ -103,12 +103,18 @@ namespace caffe
             vector<pair<int, int> > sizes_;
             int num_test_image_;
             int name_count_;
+            bool has_resize_;
+            ResizeParameter resize_param_;
             
             ptree detections_;
             
             bool visualize_;
             float visualize_threshold_;
             shared_ptr<DataTransformer<Dtype> > data_transformer_;
+            string save_file_;
+            Blob<Dtype> bbox_preds_;
+            Blob<Dtype> bbox_permute_;
+            Blob<Dtype> conf_permute_;
     };
     
 }  // namespace caffe

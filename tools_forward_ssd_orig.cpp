@@ -272,7 +272,7 @@ void Detector::Preprocess (const cv::Mat& img,
 
 DEFINE_string (mean_file, "",
                "The mean file used to subtract from the input image.");
-DEFINE_string (mean_value, "127,127,127",
+DEFINE_string (mean_value, "127.5,127.5,127.5",
                "If specified, can be one value or can be same as image channels"
                " - would subtract from the corresponding channel). Separated by ','."
                "Either mean_file or mean_value should be provided, not both.");
@@ -304,6 +304,8 @@ int main (int argc, char** argv)
     
     const string& model_file{ R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\deploy.prototxt)" };
     const string& weights_file{ R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel)" };
+    //const string& model_file{ R"(E:\CNN_Models\SSD\MobileNetSSD\MobileNetSSD_deploy000.prototxt)" };
+    //const string& weights_file{ R"(E:\CNN_Models\SSD\MobileNetSSD\MobileNetSSD_deploy.caffemodel)" };
     const string& mean_file = FLAGS_mean_file;
     const string& mean_value = FLAGS_mean_value;
     const string& file_type{ "video" };
@@ -403,9 +405,18 @@ int main (int argc, char** argv)
                             out << static_cast<int> (d[4] * img.rows) << " ";
                             out << static_cast<int> (d[5] * img.cols) << " ";
                             out << static_cast<int> (d[6] * img.rows) << std::endl;
+                            cv::rectangle (img,
+                                           cv::Rect (static_cast<int> (d[3] * img.rows),
+                                                     static_cast<int> (d[4] * img.cols),
+                                                     static_cast<int> (d[5] * img.rows),
+                                                     static_cast<int> (d[6] * img.cols)
+                                                    ),
+                                           cv::Scalar (0, 255, 0));
                         }
                     }
                     
+                    cv::imshow ("pres", img);
+                    cv::waitKey (1);
                     ++frame_count;
                 }
                 

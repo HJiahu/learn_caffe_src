@@ -19,6 +19,7 @@
 #include "caffe/layers/softmax_layer.hpp"
 #include "caffe/layers/concat_layer.hpp"
 #include "caffe/layers/shuffle_channel_layer.hpp"
+#include "caffe/layers/normalize_layer.hpp"
 
 namespace caffe
 {
@@ -40,6 +41,7 @@ namespace caffe
     extern INSTANTIATE_CLASS (ConcatLayer);
     //ShuffleChannelLayer
     extern INSTANTIATE_CLASS (ShuffleChannelLayer);
+    extern INSTANTIATE_CLASS (NormalizeLayer);
 }
 #endif
 using namespace caffe;  // NOLINT(build/namespaces)

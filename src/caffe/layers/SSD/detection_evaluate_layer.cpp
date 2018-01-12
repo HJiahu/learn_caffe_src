@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "caffe/layers/SSD/detection_evaluate_layer.hpp"
-//#include "caffe/util/bbox_util.hpp"
+#include "caffe/layers/SSD/bbox_util.hpp"
 
 namespace caffe
 {
@@ -46,6 +46,13 @@ namespace caffe
         count_ = 0;
         // If there is no name_size_file provided, use normalized bbox to evaluate.
         use_normalized_bbox_ = sizes_.size() == 0;
+        // Retrieve resize parameter if there is any provided.
+        has_resize_ = detection_evaluate_param.has_resize_param();
+        
+        if (has_resize_)
+        {
+            resize_param_ = detection_evaluate_param.resize_param();
+        }
     }
     
     template <typename Dtype>
@@ -63,7 +70,20 @@ namespace caffe
         vector<int> top_shape (2, 1);
         int num_pos_classes = background_label_id_ == -1 ?
                               num_classes_ : num_classes_ - 1;
-        top_shape.push_back (num_pos_classes + bottom[0]->height());
+        int num_valid_det = 0;
+        const Dtype* det_data = bottom[0]->cpu_data();
+        
+        for (int i = 0; i < bottom[0]->height(); ++i)
+        {
+            if (det_data[1] != -1)
+            {
+                ++num_valid_det;
+            }
+            
+            det_data += 7;
+        }
+        
+        top_shape.push_back (num_pos_classes + num_valid_det);
         // Each row is a 5 dimension vector, which stores
         // [image_id, label, confidence, true_pos, false_pos]
         top_shape.push_back (5);
@@ -166,6 +186,12 @@ namespace caffe
                         iit != detections.end(); ++iit)
                 {
                     int label = iit->first;
+                    
+                    if (label == -1)
+                    {
+                        continue;
+                    }
+                    
                     const vector<NormalizedBBox>& bboxes = iit->second;
                     
                     for (int i = 0; i < bboxes.size(); ++i)
@@ -188,6 +214,12 @@ namespace caffe
                         iit != detections.end(); ++iit)
                 {
                     int label = iit->first;
+                    
+                    if (label == -1)
+                    {
+                        continue;
+                    }
+                    
                     vector<NormalizedBBox>& bboxes = iit->second;
                     
                     if (label_bboxes.find (label) == label_bboxes.end())
@@ -215,8 +247,8 @@ namespace caffe
                             
                             for (int i = 0; i < gt_bboxes.size(); ++i)
                             {
-                                ScaleBBox (gt_bboxes[i], sizes_[count_].first,
-                                           sizes_[count_].second, & (gt_bboxes[i]));
+                                OutputBBox (gt_bboxes[i], sizes_[count_], has_resize_,
+                                            resize_param_, & (gt_bboxes[i]));
                             }
                         }
                         
@@ -232,8 +264,8 @@ namespace caffe
                             
                             if (!use_normalized_bbox_)
                             {
-                                ScaleBBox (bboxes[i], sizes_[count_].first, sizes_[count_].second,
-                                           & (bboxes[i]));
+                                OutputBBox (bboxes[i], sizes_[count_], has_resize_,
+                                            resize_param_, & (bboxes[i]));
                             }
                             
                             // Compare with each ground truth bbox.

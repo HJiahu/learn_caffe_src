@@ -7,7 +7,6 @@
 #include "caffe/blob.hpp"
 #include "caffe/layer.hpp"
 #include "caffe/proto/caffe.pb.h"
-#include "caffe/layers/SSD/bbox_util.hpp"
 
 namespace caffe
 {
@@ -65,6 +64,9 @@ namespace caffe
             vector<pair<int, int> > sizes_;
             int count_;
             bool use_normalized_bbox_;
+            
+            bool has_resize_;
+            ResizeParameter resize_param_;
     };
     
 }  // namespace caffe

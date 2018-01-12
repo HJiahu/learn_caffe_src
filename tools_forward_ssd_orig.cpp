@@ -12,8 +12,10 @@
 //    folder/video1.mp4
 //    folder/video2.mp4
 //
-#include "tools_config.h"
+
 #ifdef TOOLS_FORWARD_SSD_ORIG_CPP
+
+
 
 #include <caffe/caffe.hpp>
 #ifdef USE_OPENCV
@@ -28,7 +30,7 @@
 #include <string>
 #include <utility>
 #include <vector>
-#define USE_OPENCV
+
 #ifdef USE_OPENCV
 using namespace caffe;  // NOLINT(build/namespaces)
 
@@ -84,7 +86,8 @@ Detector::Detector (const string& model_file,
 std::vector<vector<float> > Detector::Detect (const cv::Mat& img)
 {
     Blob<float>* input_layer = net_->input_blobs() [0];
-    input_layer->Reshape (1, num_channels_, input_geometry_.height, input_geometry_.width);
+    input_layer->Reshape (1, num_channels_,
+                          input_geometry_.height, input_geometry_.width);
     /* Forward dimension change to all layers. */
     net_->Reshape();
     std::vector<cv::Mat> input_channels;
@@ -208,56 +211,38 @@ void Detector::Preprocess (const cv::Mat& img,
     cv::Mat sample;
     
     if (img.channels() == 3 && num_channels_ == 1)
-    {
-        cv::cvtColor (img, sample, cv::COLOR_BGR2GRAY);
-    }
+    { cv::cvtColor (img, sample, cv::COLOR_BGR2GRAY); }
     
     else
         if (img.channels() == 4 && num_channels_ == 1)
-        {
-            cv::cvtColor (img, sample, cv::COLOR_BGRA2GRAY);
-        }
+        { cv::cvtColor (img, sample, cv::COLOR_BGRA2GRAY); }
         
         else
             if (img.channels() == 4 && num_channels_ == 3)
-            {
-                cv::cvtColor (img, sample, cv::COLOR_BGRA2BGR);
-            }
+            { cv::cvtColor (img, sample, cv::COLOR_BGRA2BGR); }
             
             else
                 if (img.channels() == 1 && num_channels_ == 3)
-                {
-                    cv::cvtColor (img, sample, cv::COLOR_GRAY2BGR);
-                }
+                { cv::cvtColor (img, sample, cv::COLOR_GRAY2BGR); }
                 
                 else
-                {
-                    sample = img;
-                }
+                { sample = img; }
                 
     cv::Mat sample_resized;
     
     if (sample.size() != input_geometry_)
-    {
-        cv::resize (sample, sample_resized, input_geometry_);
-    }
+    { cv::resize (sample, sample_resized, input_geometry_); }
     
     else
-    {
-        sample_resized = sample;
-    }
+    { sample_resized = sample; }
     
     cv::Mat sample_float;
     
     if (num_channels_ == 3)
-    {
-        sample_resized.convertTo (sample_float, CV_32FC3);
-    }
+    { sample_resized.convertTo (sample_float, CV_32FC3); }
     
     else
-    {
-        sample_resized.convertTo (sample_float, CV_32FC1);
-    }
+    { sample_resized.convertTo (sample_float, CV_32FC1); }
     
     cv::Mat sample_normalized;
     cv::subtract (sample_float, mean_, sample_normalized);
@@ -272,7 +257,7 @@ void Detector::Preprocess (const cv::Mat& img,
 
 DEFINE_string (mean_file, "",
                "The mean file used to subtract from the input image.");
-DEFINE_string (mean_value, "127.5,127.5,127.5",
+DEFINE_string (mean_value, "104,117,123",
                "If specified, can be one value or can be same as image channels"
                " - would subtract from the corresponding channel). Separated by ','."
                "Either mean_file or mean_value should be provided, not both.");
@@ -280,7 +265,7 @@ DEFINE_string (file_type, "image",
                "The file type in the list_file. Currently support image and video.");
 DEFINE_string (out_file, "",
                "If provided, store the detection results in the out_file.");
-DEFINE_double (confidence_threshold, 0.01,
+DEFINE_double (confidence_threshold, 0.1,
                "Only store detections with score higher than the threshold.");
 
 int main (int argc, char** argv)
@@ -288,6 +273,25 @@ int main (int argc, char** argv)
     ::google::InitGoogleLogging (argv[0]);
     // Print output to stderr (while still logging)
     FLAGS_alsologtostderr = 1;
+    char * (args[]) =
+    {
+        "learn_caffe.exe",
+        "--file_type",
+        "image",
+        R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\deploy.prototxt)",
+        R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel)",
+        "D:/MyPaperData/list.txt",
+        ""
+    };
+    args[0] = argv[0];
+    args[6] = nullptr;
+    
+    if (argc == 1)
+    {
+        argc = 6;
+        argv = args;
+    }
+    
 #ifndef GFLAGS_GFLAGS_H_
     namespace gflags = google;
 #endif
@@ -296,19 +300,17 @@ int main (int argc, char** argv)
                              "    ssd_detect [FLAGS] model_file weights_file list_file\n");
     gflags::ParseCommandLineFlags (&argc, &argv, true);
     
-    if (argc < 4 && argc != 1)
+    if (argc < 4)
     {
         gflags::ShowUsageWithFlagsRestrict (argv[0], "examples/ssd/ssd_detect");
         return 1;
     }
     
-    const string& model_file{ R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\deploy.prototxt)" };
-    const string& weights_file{ R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel)" };
-    //const string& model_file{ R"(E:\CNN_Models\SSD\MobileNetSSD\MobileNetSSD_deploy000.prototxt)" };
-    //const string& weights_file{ R"(E:\CNN_Models\SSD\MobileNetSSD\MobileNetSSD_deploy.caffemodel)" };
+    const string& model_file = argv[1];
+    const string& weights_file = argv[2];
     const string& mean_file = FLAGS_mean_file;
     const string& mean_value = FLAGS_mean_value;
-    const string& file_type{ "video" };
+    const string& file_type = FLAGS_file_type;
     const string& out_file = FLAGS_out_file;
     const float confidence_threshold = FLAGS_confidence_threshold;
     // Initialize the network.
@@ -329,16 +331,16 @@ int main (int argc, char** argv)
     
     std::ostream out (buf);
     // Process image one by one.
-    std::string video_path{ R"(D:\MyPaperData\handShake_0036.avi)" };
-    //std::ifstream infile ("");
+    std::ifstream infile (argv[3]);
     std::string file;
-    //while (infile >> file)
+    
+    while (infile >> file)
     {
         if (file_type == "image")
         {
-            cv::Mat img = cv::imread (R"(E:\CNN_Models\SSD\MobileNetSSD\000000020853.jpg)", -1);
+            cv::Mat img = cv::imread (file, -1);
             CHECK (!img.empty()) << "Unable to decode image " << file;
-            std::vector<vector<float> > detections = detector.Detect (img);
+            std::vector<vector<float> > detections = detector.Detect (img.clone());
             
             /* Print the detection results. */
             for (int i = 0; i < detections.size(); ++i)
@@ -357,14 +359,21 @@ int main (int argc, char** argv)
                     out << static_cast<int> (d[4] * img.rows) << " ";
                     out << static_cast<int> (d[5] * img.cols) << " ";
                     out << static_cast<int> (d[6] * img.rows) << std::endl;
+                    cv::rectangle (img,
+                                   cv::Rect (cv::Point (static_cast<int> (d[3] * img.cols), static_cast<int> (d[4] * img.rows)),
+                                             cv::Point (static_cast<int> (d[5] * img.cols), static_cast<int> (d[6] * img.rows))),
+                                   cv::Scalar (0, 255, 0));
                 }
             }
+            
+            cv::imshow ("test", img);
+            cv::waitKey();
         }
         
         else
             if (file_type == "video")
             {
-                cv::VideoCapture cap (video_path);
+                cv::VideoCapture cap (file);
                 
                 if (!cap.isOpened())
                 {
@@ -406,17 +415,14 @@ int main (int argc, char** argv)
                             out << static_cast<int> (d[5] * img.cols) << " ";
                             out << static_cast<int> (d[6] * img.rows) << std::endl;
                             cv::rectangle (img,
-                                           cv::Rect (static_cast<int> (d[3] * img.rows),
-                                                     static_cast<int> (d[4] * img.cols),
-                                                     static_cast<int> (d[5] * img.rows),
-                                                     static_cast<int> (d[6] * img.cols)
-                                                    ),
+                                           cv::Rect (cv::Point (static_cast<int> (d[4] * img.cols), static_cast<int> (d[3] * img.rows)),
+                                                     cv::Point (static_cast<int> (d[6] * img.cols), static_cast<int> (d[5] * img.rows))),
                                            cv::Scalar (0, 255, 0));
                         }
                     }
                     
-                    cv::imshow ("pres", img);
-                    cv::waitKey (1);
+                    cv::imshow ("test", img);
+                    // cv::waitKey ();
                     ++frame_count;
                 }
                 
@@ -431,11 +437,10 @@ int main (int argc, char** argv)
                 LOG (FATAL) << "Unknown file_type: " << file_type;
             }
     }
-#ifdef _MSC_VER
-    system ("pause");
-#endif // _MSC_VER
+    
     return 0;
 }
+
 #else
 int main (int argc, char** argv)
 {

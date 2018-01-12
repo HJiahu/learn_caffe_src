@@ -1,11 +1,21 @@
+/*
+	attention!
+	The mobile ssd model is coming from https://github.com/chuanqi305/MobileNet-SSD
+	there is an issue when you use CPP code to load this net:
+	https://github.com/chuanqi305/MobileNet-SSD/issues/19#issuecomment-322992276
+	I had add a line( sample_normalized *= 0.007843; ) to Preprocess function
+*/
+
 #include "tools_config.h"
-#ifdef TOOLS_FORWARD_SSD_CPP
+#ifdef TOOLS_FORWARD_MOBILENET_SSD_CPP
 
 #include <iostream>
 #include <caffe/caffe.hpp>
 #include "my_configs.h"
 #include <opencv2/opencv.hpp>
 #include <chrono>
+#include "my_configs.h"
+
 using namespace caffe;
 using namespace cv;
 using namespace std;
@@ -42,7 +52,7 @@ const size_t inHeight = 300;
 const float WHRatio = inWidth / (float) inHeight;
 const float inScaleFactor = 0.007843f;
 const float meanVal = 127.5;
-const float confidence_threshold = 0.5;
+const float confidence_threshold = 0.3;
 const char* classNames[] = { "background",
                              "aeroplane", "bicycle", "bird", "boat",
                              "bottle", "bus", "car", "cat", "chair",
@@ -54,10 +64,10 @@ const char* classNames[] = { "background",
 
 int main()
 {
-    std::string model_prototxt_path{ R"(E:\CNN_Models\SSD\MobileNetSSD\MobileNetSSD_deploy000.prototxt)" };
-    std::string trained_model{ R"(E:\CNN_Models\SSD\MobileNetSSD\MobileNetSSD_deploy.caffemodel)" };
+    std::string model_prototxt_path{ (root_path_g / "models/mobileNet_ssd/MobileNetSSD_deploy.prototxt").string() };
+    std::string trained_model{ (root_path_g / "models/mobileNet_ssd/MobileNetSSD_deploy.caffemodel").string() };
     Detector detector (model_prototxt_path, trained_model, "", "127.5,127.5,127.5");
-    VideoCapture cap (R"(D:\MyPaperData\handShake_0036.avi)");
+    VideoCapture cap ( (root_path_g / "models/mobileNet_ssd/handShake_0036.avi").string());
     
     if (!cap.isOpened()) // check if we succeeded
     {
@@ -84,9 +94,7 @@ int main()
         }
         
         CHECK (!img.empty()) << "Error when read frame";
-        imshow ("original img", img);
-        waitKey (1);
-        std::vector<vector<float> > detections = detector.Detect (img);
+        std::vector<vector<float> > detections = detector.Detect (img.clone());
         
         /* Print the detection results. */
         for (int i = 0; i < detections.size(); ++i)
@@ -94,18 +102,27 @@ int main()
             const vector<float>& d = detections[i];
             // Detection format: [image_id, label, score, xmin, ymin, xmax, ymax].
             CHECK_EQ (d.size(), 7);
-            const float score = d[2];
+            const float score = d[2];// 对象置信度
             
             if (score >= confidence_threshold)
             {
-                cout << std::setfill ('0') << std::setw (6) << frame_count << " ";
-                cout << static_cast<int> (d[1]) << " ";
-                cout << score << " ";
-                cout << static_cast<int> (d[3] * img.cols) << " ";
-                cout << static_cast<int> (d[4] * img.rows) << " ";
-                cout << static_cast<int> (d[5] * img.cols) << " ";
-                cout << static_cast<int> (d[6] * img.rows) << std::endl;
+                size_t object_class = static_cast<size_t> (d[1]);
+                int lefttop_x = static_cast<int> (d[3] * img.cols);
+                int lefttop_y = static_cast<int> (d[4] * img.rows);
+                int rightbottom_x = static_cast<int> (d[5] * img.cols);
+                int rightbottom_y = static_cast<int> (d[6] * img.rows);
+                cv::rectangle (img,
+                               cv::Rect (cv::Point (lefttop_x, lefttop_y),
+                                         cv::Point (rightbottom_x, rightbottom_y)),
+                               cv::Scalar (0, 255, 0));
+                int baseLine = 0;
+                string label = string (classNames[object_class]) + ": " + to_string (score);
+                Size labelSize = getTextSize (label, FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+                putText (img, label, Point (lefttop_x, lefttop_y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar (0, 0, 255));
             }
+            
+            imshow ("img with boxs", img);
+            waitKey (1);
         }
         
         ++frame_count;
@@ -116,51 +133,6 @@ int main()
         cap.release();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 Detector::Detector (const string& model_file,
@@ -388,6 +360,7 @@ void Detector::Preprocess (const cv::Mat& img, std::vector<cv::Mat>* input_chann
     
     cv::Mat sample_normalized;
     cv::subtract (sample_float, mean_, sample_normalized);
+    sample_normalized *= 0.007843; //this line was added by HJiahu. refer to https://github.com/chuanqi305/MobileNet-SSD/issues/19
     /* This operation will write the separate BGR planes directly to the
     * input layer of the network because it is wrapped by the cv::Mat
     * objects in input_channels. */
@@ -397,4 +370,4 @@ void Detector::Preprocess (const cv::Mat& img, std::vector<cv::Mat>* input_chann
             << "Input channels are not wrapping the input layer of the network.";
 }
 
-#endif // TOOLS_FORWARD_SSD_CPP
+#endif // TOOLS_FORWARD_MOBILENET_SSD_CPP

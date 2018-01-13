@@ -94,7 +94,10 @@ int main()
         }
         
         CHECK (!img.empty()) << "Error when read frame";
+        chrono::system_clock::time_point start = chrono::system_clock::now();
         std::vector<vector<float> > detections = detector.Detect (img.clone());
+        chrono::system_clock::time_point end = chrono::system_clock::now();
+        cout << "detection ms: " << chrono::duration_cast<chrono::milliseconds> (end - start).count() << endl;
         
         /* Print the detection results. */
         for (int i = 0; i < detections.size(); ++i)
@@ -360,7 +363,7 @@ void Detector::Preprocess (const cv::Mat& img, std::vector<cv::Mat>* input_chann
     
     cv::Mat sample_normalized;
     cv::subtract (sample_float, mean_, sample_normalized);
-    sample_normalized *= 0.007843; //this line was added by HJiahu. refer to https://github.com/chuanqi305/MobileNet-SSD/issues/19
+    sample_normalized *= inScaleFactor; //this line was added by HJiahu. refer to https://github.com/chuanqi305/MobileNet-SSD/issues/19
     /* This operation will write the separate BGR planes directly to the
     * input layer of the network because it is wrapped by the cv::Mat
     * objects in input_channels. */

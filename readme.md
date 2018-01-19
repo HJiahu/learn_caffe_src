@@ -12,7 +12,8 @@ caffe的源码都在`read_caffe_vs2015`文件夹中
 	> `git clone https://github.com/HJiahu/learn_caffe_src.git  read_caffe_src`  
 	> 在编译时常会提示boost的lib找不到，其实对应的目录下有对应的文件，只要改个名字即可【[参考][0]】   
 	> 调试程序前先依据具体情况修改`my_configs.h`中的根目录变量`root_path_g`、`model_root_path_g`  
-	> 通过注释`tools_config.h`中的中的宏，选择需要编译与执行的文件  
+	> 通过注释`tools_config.h`中的中的宏，选择需要编译与执行的文件   
+	> 因为.gitignore会忽略一些文件，可能需要手动添加环境变量（配置属性->调试->环境）：`PATH=C:\caffe_deps\libraries\x64\vc14\bin;C:\caffe_deps\libraries\lib;C:\caffe_deps\libraries\bin;`
 
 #### 文件说明
 *	`proto_example`是protobuf的一个简单例子

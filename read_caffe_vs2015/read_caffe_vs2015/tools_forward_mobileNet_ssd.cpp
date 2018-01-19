@@ -87,7 +87,7 @@ int main()
     while (true)
     {
         bool success = cap.read (img);
-        cv::Mat img = cv::imread ( (root_path_g / "models/mobileNet_ssd/000018.jpg").string());
+        //cv::Mat img = cv::imread ( (root_path_g / "models/mobileNet_ssd/000018.jpg").string());
         
         if (!success)
         {

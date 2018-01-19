@@ -15,13 +15,21 @@ namespace caffe
 
     // Caffe gemm provides a simpler interface to the gemm functions, with the
     // limitation that the data has to be contiguous in memory.
-	// 这里有个void caffe_cpu_gemm<float>版的函数在对应的cpp中
+    // 这里有个void caffe_cpu_gemm<float>版的函数在对应的cpp中
+	// C=alpha*A*B + beta*C
     template <typename Dtype>
-    void caffe_cpu_gemm (const CBLAS_TRANSPOSE TransA,
-                         const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
-                         const Dtype alpha, const Dtype* A, const Dtype* B, const Dtype beta,
-                         Dtype* C);
-                         
+    void caffe_cpu_gemm (const CBLAS_TRANSPOSE TransA, 
+                         const CBLAS_TRANSPOSE TransB,// 这两句表明是否对 A 或 B 进行转置
+                         const int M,// 输出矩阵的行数
+                         const int N,// 输出矩阵的列数
+                         const int K,// A 的列数
+                         const Dtype alpha,
+                         const Dtype* A,
+                         const Dtype* B,
+                         const Dtype beta,
+                         Dtype* C
+                        );
+                        
     template <typename Dtype>
     void caffe_cpu_gemv (const CBLAS_TRANSPOSE TransA, const int M, const int N,
                          const Dtype alpha, const Dtype* A, const Dtype* x, const Dtype beta,

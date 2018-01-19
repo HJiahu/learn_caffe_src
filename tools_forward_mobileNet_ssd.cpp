@@ -68,6 +68,7 @@ int main()
     std::string trained_model{ (root_path_g / "models/mobileNet_ssd/MobileNetSSD_deploy.caffemodel").string() };
     Detector detector (model_prototxt_path, trained_model, "", "127.5,127.5,127.5");
     VideoCapture cap ( (root_path_g / "models/mobileNet_ssd/handShake_0036.avi").string());
+    //VideoCapture cap("I:/movies/Brotherhood.mkv");
     
     if (!cap.isOpened()) // check if we succeeded
     {
@@ -86,6 +87,7 @@ int main()
     while (true)
     {
         bool success = cap.read (img);
+        cv::Mat img = cv::imread ( (root_path_g / "models/mobileNet_ssd/000018.jpg").string());
         
         if (!success)
         {

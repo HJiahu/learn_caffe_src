@@ -53,7 +53,7 @@ def detectFace(img_path,threshold):
     image_num = len(scales)
     rectangles = []
     for i in range(image_num):    
-        cls_prob = out[i]['prob1'][0][1]
+        cls_prob = out[i]['prob1'][0][1] # 这个给出的是每个点的分类精度
         roi      = out[i]['conv4-2'][0]
         out_h,out_w = cls_prob.shape
         out_side = max(out_h,out_w)

@@ -11,49 +11,94 @@
 *	如果在windows下无法运行sh文件，请下载并安装[cmder][1]，然后按照cmder的说明文档将cmder注册到系统中【[参考][2]】。
 *	[百度云分享][3]中有完整版的mnist数据集，与官方不同这个数据集中都是jpg格式的图片。命名规则：[标签]-[同标签计数]-[总图片计数].jpg
 *	[百度云分享][4]中也有从cifar数据集中提取的图片，命名规则①cifar10：[标签]-[总图片计数].jpg ②cifar100：[coarse_label]-[fine_label]-[总图片计数].jpg
-*	MACROs used in vs2015 debug x64
+*	MACROs used in vs2015 debug/release x64 
+	*	debug
 
-		_DEBUG
-		_CONSOLE
-		CPU_ONLY
-		_SCL_SECURE_NO_WARNINGS
-		_CRT_SECURE_NO_DEPRECATE
-		_CRT_NONSTDC_NO_DEPRECATE
-		USE_LMDB
-		USE_OPENCV
-*	3rdparty libs use in vs2015 debug x64
+			_DEBUG
+			_CONSOLE
+			CPU_ONLY
+			_SCL_SECURE_NO_WARNINGS
+			_CRT_SECURE_NO_DEPRECATE
+			_CRT_NONSTDC_NO_DEPRECATE
+			USE_LMDB
+			USE_OPENCV
 
-		opencv_world310d.lib
-		boost_chrono-vc140-mt-gd-1_61.lib
-		boost_date_time-vc140-mt-gd-1_61.lib
-		boost_filesystem-vc140-mt-gd-1_61.lib
-		boost_system-vc140-mt-gd-1_61.lib
-		boost_thread-vc140-mt-gd-1_61.lib
-		boost_timer-vc140-mt-gd-1_61.lib
-		libopenblas.dll.a
-		caffehdf5_D.lib
-		caffehdf5_cpp_D.lib
-		caffehdf5_hl_D.lib
-		caffehdf5_hl_cpp_D.lib
-		caffezlibd.lib
-		caffezlibstaticd.lib
-		gflagsd.lib
-		glogd.lib
-		leveldbd.lib
-		libboost_chrono-vc140-mt-gd-1_61.lib
-		libboost_system-vc140-mt-gd-1_61.lib
-		libboost_timer-vc140-mt-gd-1_61.lib
-		libcaffehdf5_D.lib
-		libcaffehdf5_cpp_D.lib
-		libcaffehdf5_hl_D.lib
-		libcaffehdf5_hl_cpp_D.lib
-		libprotobufd.lib
-		libprotocd.lib
-		lmdbd.lib
-		snappy_staticd.lib
-		snappyd.lib
-		ntdll.lib
+	*	release
 
+			NDEBUG
+			_CONSOLE
+			CPU_ONLY
+			_SCL_SECURE_NO_WARNINGS
+			_CRT_SECURE_NO_DEPRECATE
+			_CRT_NONSTDC_NO_DEPRECATE
+			USE_LMDB
+			USE_OPENCV
+
+*	3rdparty libs use in vs2015 debug/release x64
+	*	debug
+
+			opencv_world310d.lib
+			boost_chrono-vc140-mt-gd-1_61.lib
+			boost_date_time-vc140-mt-gd-1_61.lib
+			boost_filesystem-vc140-mt-gd-1_61.lib
+			boost_system-vc140-mt-gd-1_61.lib
+			boost_thread-vc140-mt-gd-1_61.lib
+			boost_timer-vc140-mt-gd-1_61.lib
+			libopenblas.dll.a
+			caffehdf5_D.lib
+			caffehdf5_cpp_D.lib
+			caffehdf5_hl_D.lib
+			caffehdf5_hl_cpp_D.lib
+			caffezlibd.lib
+			caffezlibstaticd.lib
+			gflagsd.lib
+			glogd.lib
+			leveldbd.lib
+			libboost_chrono-vc140-mt-gd-1_61.lib
+			libboost_system-vc140-mt-gd-1_61.lib
+			libboost_timer-vc140-mt-gd-1_61.lib
+			libcaffehdf5_D.lib
+			libcaffehdf5_cpp_D.lib
+			libcaffehdf5_hl_D.lib
+			libcaffehdf5_hl_cpp_D.lib
+			libprotobufd.lib
+			libprotocd.lib
+			lmdbd.lib
+			snappy_staticd.lib
+			snappyd.lib
+			ntdll.lib
+
+	*	release	
+
+			opencv_world310.lib
+			boost_chrono-vc140-mt-1_61.lib
+			boost_date_time-vc140-mt-1_61.lib
+			boost_filesystem-vc140-mt-1_61.lib
+			boost_system-vc140-mt-1_61.lib
+			boost_timer-vc140-mt-1_61.lib
+			libopenblas.dll.a
+			caffehdf5.lib
+			caffehdf5_cpp.lib
+			caffehdf5_hl.lib
+			caffehdf5_hl_cpp.lib
+			caffezlib.lib
+			caffezlibstatic.lib
+			gflags.lib
+			glog.lib
+			leveldb.lib
+			libboost_chrono-vc140-mt-1_61.lib
+			libboost_system-vc140-mt-1_61.lib
+			libboost_timer-vc140-mt-1_61.lib
+			libcaffehdf5.lib
+			libcaffehdf5_cpp.lib
+			libcaffehdf5_hl.lib
+			libcaffehdf5_hl_cpp.lib
+			libprotobuf.lib
+			libprotoc.lib
+			lmdb.lib
+			snappy_static.lib
+			snappy.lib
+			ntdll.lib
 
 
 

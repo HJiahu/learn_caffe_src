@@ -18,7 +18,7 @@ namespace caffe
      *
      * TODO(dox): thorough documentation for Forward and proto params.
      */
-    //基本的数据层读取操作与前向与后向传播算法的接口定义在了当前类中
+    // 基本的数据层读取操作与前向与后向传播算法的接口定义在了当前类中
     template <typename Dtype>
     class BaseDataLayer : public Layer<Dtype>
     {

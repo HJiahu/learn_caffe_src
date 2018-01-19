@@ -12,7 +12,7 @@
 //    folder/video1.mp4
 //    folder/video2.mp4
 //
-
+#include "tools_config.h"
 #ifdef TOOLS_FORWARD_SSD_ORIG_CPP
 
 
@@ -30,10 +30,11 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <chrono>
 
 #ifdef USE_OPENCV
 using namespace caffe;  // NOLINT(build/namespaces)
-
+using namespace std;
 class Detector
 {
     public:
@@ -53,7 +54,7 @@ class Detector
                          std::vector<cv::Mat>* input_channels);
                          
     private:
-        shared_ptr<Net<float> > net_;
+        std::shared_ptr<Net<float> > net_;
         cv::Size input_geometry_;
         int num_channels_;
         cv::Mat mean_;
@@ -278,8 +279,8 @@ int main (int argc, char** argv)
         "learn_caffe.exe",
         "--file_type",
         "image",
-        R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\deploy.prototxt)",
-        R"(E:\CNN_Models\SSD\VOC0712Plus\SSD_300x300_ft\VGG_VOC0712Plus_SSD_300x300_ft_iter_160000.caffemodel)",
+        R"(E:\CNN_Models\SSD\SSD_512x512_ft\deploy.prototxt)",
+        R"(E:\CNN_Models\SSD\SSD_512x512_ft\VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.caffemodel)",
         "D:/MyPaperData/list.txt",
         ""
     };
@@ -340,7 +341,10 @@ int main (int argc, char** argv)
         {
             cv::Mat img = cv::imread (file, -1);
             CHECK (!img.empty()) << "Unable to decode image " << file;
+            chrono::system_clock::time_point start = chrono::system_clock::now();
             std::vector<vector<float> > detections = detector.Detect (img.clone());
+            chrono::system_clock::time_point end = chrono::system_clock::now();
+            cout << "consumed ms: " << chrono::duration_cast<chrono::milliseconds> (end - start).count() << endl;
             
             /* Print the detection results. */
             for (int i = 0; i < detections.size(); ++i)

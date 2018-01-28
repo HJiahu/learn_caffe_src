@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include "my_configs.h"
+#include "path.h"
 using namespace caffe;
 using namespace std;
 
@@ -19,7 +20,10 @@ std::pair<int, std::shared_ptr<float> > generate_test_img (int num = -1, bool sh
 //在控制台显示caffe的预测结果，lenet最后一层的输出是一个和为1的概率向量（float型的数组，lenet中的输出是float[10]）
 void show_predict (const float *output);
 
+#define LENET_FCN
+//#define LENET_FROM_CAFFE_EXAMPLE
 
+#ifdef LENET_FROM_CAFFE_EXAMPLE
 int main (int argc, char* argv[])
 {
     ::google::InitGoogleLogging (argv[0]); //是否在终端显示网络的载入过程（注释后将显示所有信息到终端否则只显示错误）
@@ -55,8 +59,78 @@ int main (int argc, char* argv[])
 #endif // _MSC_VER
     return 0;
 }
+#endif // LENET_FROM_CAFFE_EXAMPLE
 
-
+#ifdef LENET_FCN
+int main (int argc, char* argv[])
+{
+    ::google::InitGoogleLogging (argv[0]); //是否在终端显示网络的载入过程（注释后将显示所有信息到终端否则只显示错误）
+    cout << "init ......" << endl;
+    //网络结构文件
+    const string lenet_prototxt_path ( (model_root_path_g / "lenet_model/lenet.prototxt").string());
+    //训练好的网络模型，这个模型的准确度不高，6和7都会被误检
+    const string lenet_model_path ( (model_root_path_g / "lenet_model/lenet_iter_20000.caffemodel").string());
+    const string img_path{ (model_root_path_g / "lenet_model/9_76.jpg").string() };
+    typedef float type;
+    cv::Mat img (cv::imread (img_path, 0));
+    assert (img.channels() == 1);
+    
+    if (img.empty())
+    {
+        std::cout << "can not open this file: " << img_path << endl;
+        getchar();
+        exit (1);
+    }
+    
+    img.convertTo (img, CV_8UC1);
+    assert (img.isContinuous());
+    vector<float> data_buf (img.cols * img.rows, 0.0);
+    unsigned char* first_pixel_ptr = img.ptr<unsigned char> (0);
+    
+    //将图像的数值从uchar[0,255]转换成float[0.0f,1.0f],的数, 且颜色取相反的 .
+    for (int i = 0; i < img.cols * img.rows; i++)
+    {
+        // f_val =(255-uchar_val)/255.0f
+        data_buf[i] = static_cast<float> (first_pixel_ptr[i] ^ 0xFF) * 0.00390625;
+    }
+    
+    //初始化caffe
+    //set cpu running software
+    Caffe::set_mode (Caffe::CPU);
+    //load net file	, caffe::TEST 用于测试时使用
+    Net<type> lenet (lenet_prototxt_path, caffe::TEST);
+    //load net train file caffemodel
+    //因为caffe使用protobuf实现数据的持久化所以网络结构文件与 model 文一一对应
+    lenet.CopyTrainedLayersFrom (lenet_model_path);
+    Blob<type> *input_ptr = lenet.input_blobs() [0];
+    input_ptr->Reshape (1, 1, img.rows, img.cols);
+    lenet.Reshape();
+    Blob<type> *output_ptr = lenet.output_blobs() [0];
+    //output_ptr->Reshape (1, 10, 1, 1);
+    //copy data from <ary> to <input_ptr>
+    input_ptr->set_cpu_data (data_buf.data());
+    cout << "test img is :" << Path (img_path).filename() << endl;
+    //begin once predict
+    lenet.Forward();
+	show_predict(output_ptr->cpu_data());
+    cout << "finshed." << endl;
+    
+    for (int i = 0; i < 10; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            cout <<"\t"<< output_ptr->cpu_data() [i * 10 + j];
+        }
+        
+        cout << endl;
+    }
+    
+#ifdef _MSC_VER
+    system ("pause");
+#endif // _MSC_VER
+    return 0;
+}
+#endif // LENET_FCN
 
 
 
@@ -118,6 +192,7 @@ std::pair<int, std::shared_ptr<float> > generate_test_img (int num, bool show_im
     
     return make_pair (num, data_ptr);
 }
+
 
 
 void show_predict (const float *output)

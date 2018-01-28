@@ -74,8 +74,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\caffe_deps\libraries\include\boost-1_61;C:\caffe_deps\libraries\include;./caffe_includes;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\caffe_deps\libraries\x64\vc14\lib;C:\caffe_deps\libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files\Anaconda3\include;C:\caffe_deps\libraries\include\boost-1_61;C:\caffe_deps\libraries\include;./caffe_includes;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files\Anaconda3\libs;C:\caffe_deps\libraries\x64\vc14\lib;C:\caffe_deps\libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -106,7 +106,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CONSOLE;CPU_ONLY;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;USE_LMDB;USE_OPENCV;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CONSOLE;CPU_ONLY;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;USE_LMDB;USE_OPENCV;WITH_PYTHON_LAYER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>

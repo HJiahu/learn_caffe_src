@@ -15,6 +15,7 @@
 #include "boost/algorithm/string.hpp"
 #include "caffe/caffe.hpp"
 #include "caffe/util/signal_handler.h"
+#include "my_configs.h"
 
 using caffe::Blob;
 using caffe::Caffe;
@@ -569,21 +570,23 @@ RegisterBrewFunction (time);
 
 int main (int argc, char** argv)
 {
+    //#define USE_CIFAR10
+#define USE_LENET
+#ifdef USE_CIFAR10
+    char* solver_file_path = (char*) (model_root_path_g / "cifar10_model/cifar10_full_solver.prototxt").string().c_str();
+#elif defined(USE_LENET)
+    const string solver_path { (model_root_path_g / "lenet_model/digits_10000/lenet_files/lenet_solver.prototxt").string() };
+    char* solver_file_path = (char*) solver_path.c_str();
+#endif
+    
     //至少在vs2015中调试代码时argc与argv依旧可用此时argc==1
     if (argc == 1)
     {
         //caffe test -model .\lenet_train_test.prototxt -weights .\lenet_iter_20000.caffemodel -iterations 100
         //修改argc和argv，在函数内部提供参数，便于调试
         //指令形式：caffe train -solver ./*solver.prototxt
-        //#define USE_CIFAR10
-#define USE_LENET
-#ifdef USE_CIFAR10
-        char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/cifar10_model/cifar10_full_solver.prototxt";
-#elif defined(USE_LENET)
-        char* solver_file_path = "I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_solver.prototxt";
-#endif
 #define TRAIN
-//#define TEST
+        //#define TEST
 #ifdef TRAIN
         char * (command_vec[]) = { "caffe", "train", "-solver", solver_file_path };
         argc = 4;

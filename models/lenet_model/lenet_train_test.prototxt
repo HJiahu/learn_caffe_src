@@ -11,8 +11,8 @@ layer {
     scale: 0.00390625
   }
   data_param {
-    source: "I:/learn_caffe/learn_caffe/LMDB10000/train_7500_gray_lmdb"
-    batch_size: 64
+    source: "C:/read_caffe_src/models/lenet_model/digits_10000/LMDB_TEST"
+    batch_size: 10
     backend: LMDB
   }
 }
@@ -28,8 +28,8 @@ layer {
     scale: 0.00390625
   }
   data_param {
-    source: "I:/learn_caffe/learn_caffe/LMDB10000/test_2500_gray_lmdb"
-    batch_size: 100
+    source: "C:/read_caffe_src/models/lenet_model/digits_10000/LMDB_TEST"
+    batch_size: 5
     backend: LMDB
   }
 }

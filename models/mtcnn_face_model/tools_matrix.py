@@ -7,6 +7,7 @@ import cv2
 '''
 Function:
 	change rectangles into squares (matrix version)
+	将矩形转化为正方形
 Input:
 	rectangles: rectangles[i][0:3] is the position, rectangles[i][4] is score
 Output:
@@ -15,11 +16,14 @@ Output:
 def rect2square(rectangles):
     w = rectangles[:,2] - rectangles[:,0]
     h = rectangles[:,3] - rectangles[:,1]
+    # 找到长宽的最大值
     l = np.maximum(w,h).T
+    # 移动坐标使得坐标表示的是一个正方形
     rectangles[:,0] = rectangles[:,0] + w*0.5 - l*0.5
     rectangles[:,1] = rectangles[:,1] + h*0.5 - l*0.5 
     rectangles[:,2:4] = rectangles[:,0:2] + np.repeat([l], 2, axis = 0).T 
     return rectangles
+
 '''
 Function:
 	apply NMS(non-maximum suppression) on ROIs in same scale(matrix version)
@@ -37,10 +41,14 @@ def NMS(rectangles,threshold,type):
     x2 = boxes[:,2]
     y2 = boxes[:,3]
     s  = boxes[:,4]
+    # 因为12net中有bbx回归所以即使同一尺度下的预选框，其面积大小也不太可能相同
     area = np.multiply(x2-x1+1, y2-y1+1)
+    # 对s进行排序，返回的是排好序的数据的下标
     I = np.array(s.argsort())
     pick = []
     while len(I)>0:
+        # 下面7行用于计算阈值最大框与其他框相交面积
+        # 下两行找到所有位于当前点右侧的框
         xx1 = np.maximum(x1[I[-1]], x1[I[0:-1]]) #I[-1] have hightest prob score, I[0:-1]->others
         yy1 = np.maximum(y1[I[-1]], y1[I[0:-1]])
         xx2 = np.minimum(x2[I[-1]], x2[I[0:-1]])
@@ -48,11 +56,13 @@ def NMS(rectangles,threshold,type):
         w = np.maximum(0.0, xx2 - xx1 + 1)
         h = np.maximum(0.0, yy2 - yy1 + 1)
         inter = w * h
-        if type == 'iom':
+        # 当前函数提供了两种 NMS 方式
+        if type == 'iom': # Intersection over Min-area 交集与两者中最小面积的比值
             o = inter / np.minimum(area[I[-1]], area[I[0:-1]])
-        else:
+        else: # Intersection over Union 交集与并集的比值
             o = inter / (area[I[-1]] + area[I[0:-1]] - inter)
         pick.append(I[-1])
+        # 只保留相交面积小于阈值的框用于下次的计算
         I = I[np.where(o<=threshold)[0]]
     result_rectangle = boxes[pick].tolist()
     return result_rectangle
@@ -68,26 +78,34 @@ Input:
 	height   : image's origin height
 	threshold: 0.6 can have 99% recall rate
 '''
+# 参数分别为：网络的类别输出、网络的边框回归、网络类别输出的最大边长、缩放因子的倒数、原图的宽、原图高、阈值
 def detect_face_12net(cls_prob,roi,out_side,scale,width,height,threshold):
-    in_side = 2*out_side+11
-    stride = 0
+    in_side = 2*out_side+11 # 输入图像最长边的边长，这个是基于网络结构的，可以参考FCN论文进行计算
+    stride = 0 # 输出 feature map 相邻两个像素映射回原图后两个像素之间的距离
     if out_side != 1:
         stride = float(in_side-12)/(out_side-1)
+    # 找到 cls_prob 中大于阈值的点并保存这些点的位置
     (x,y) = np.where(cls_prob>=threshold)
-    boundingbox = np.array([x,y]).T
-    bb1 = np.fix((stride * (boundingbox) + 0 ) * scale)
+    # 在不考虑bbx回归时找到输出 feature map 映射回原图的bbx
+    boundingbox = np.array([x,y]).T # 当维度不小于2时转置
+    bb1 = np.fix((stride * (boundingbox) + 0 ) * scale) # 向 0 取整
     bb2 = np.fix((stride * (boundingbox) + 11) * scale)
     boundingbox = np.concatenate((bb1,bb2),axis = 1)
+
+    # 每个bbx回归的四个值
     dx1 = roi[0][x,y]
     dx2 = roi[1][x,y]
     dx3 = roi[2][x,y]
     dx4 = roi[3][x,y]
     score = np.array([cls_prob[x,y]]).T
     offset = np.array([dx1,dx2,dx3,dx4]).T
+    # 考虑 bbx 回归时输出 feature map 映射回原图时的 bbx
     boundingbox = boundingbox + offset*12.0*scale
+    # 每个 bbx 后添加对应的置信值
     rectangles = np.concatenate((boundingbox,score),axis=1)
-    rectangles = rect2square(rectangles)
+    rectangles = rect2square(rectangles) # 将矩形转化为正方形
     pick = []
+    # 修正所有可能的 bbx 使得其都位于当前图像内
     for i in range(len(rectangles)):
         x1 = int(max(0     ,rectangles[i][0]))
         y1 = int(max(0     ,rectangles[i][1]))
@@ -97,9 +115,11 @@ def detect_face_12net(cls_prob,roi,out_side,scale,width,height,threshold):
         if x2>x1 and y2>y1:
             pick.append([x1,y1,x2,y2,sc])
     return NMS(pick,0.5,'iou')
+
 '''
 Function:
 	Filter face position and calibrate bounding box on 12net's output
+	与detect_face_12net的处理过程是否相似
 Input:
 	cls_prob  : softmax feature map for face classify
 	roi_prob  : feature map for regression
@@ -141,6 +161,7 @@ def filter_face_24net(cls_prob,roi,rectangles,width,height,threshold):
         if x2>x1 and y2>y1:
             pick.append([x1,y1,x2,y2,sc])
     return NMS(pick,0.7,'iou')
+
 '''
 Function:
 	Filter face position and calibrate bounding box on 12net's output
@@ -170,6 +191,7 @@ def filter_face_48net(cls_prob,roi,pts,rectangles,width,height,threshold):
     dx4 = roi[pick,3]
     w   = x2-x1
     h   = y2-y1
+    # 5个landmark点
     pts0= np.array([(w*pts[pick,0]+x1)[0]]).T
     pts1= np.array([(h*pts[pick,5]+y1)[0]]).T
     pts2= np.array([(w*pts[pick,1]+x1)[0]]).T

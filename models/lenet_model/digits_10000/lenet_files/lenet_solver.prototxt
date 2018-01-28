@@ -1,5 +1,5 @@
 # The train/test net protocol buffer definition
-net: "I:/learn_caffe/learn_caffe/caffe_src/lenet_model/digits_10000/lenet_files/lenet_train_test.prototxt"
+net: "C:/read_caffe_src/models/lenet_model/digits_10000/lenet_files/lenet_train_test.prototxt"
 
 # test_iter specifies how many forward passes the test should carry out.
 # In the case of MNIST, we have test batch size 100 and 100 test iterations,
@@ -26,7 +26,7 @@ max_iter: 1000
 
 # snapshot intermediate results
 snapshot: 500
-snapshot_prefix: "I:/learn_caffe/learn_caffe/LMDB10000/snapshot/lenet"
+snapshot_prefix: "C:/read_caffe_src/models/lenet_model/digits_10000/lenet_files/snapshot/lenet"
 
 # solver mode: CPU or GPU
 solver_mode: CPU

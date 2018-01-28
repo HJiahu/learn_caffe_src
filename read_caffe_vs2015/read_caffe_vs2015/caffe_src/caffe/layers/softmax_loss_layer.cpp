@@ -14,6 +14,7 @@ namespace caffe
     {
         LossLayer<Dtype>::LayerSetUp (bottom, top);
         LayerParameter softmax_param (this->layer_param_);
+		// softmaxwithlosslayer使用了softmaxlayer，这样就不用写forward，前者使用后者的输出计算loss
         softmax_param.set_type ("Softmax");
         softmax_layer_ = LayerRegistry<Dtype>::CreateLayer (softmax_param);
         softmax_bottom_vec_.clear();
@@ -113,6 +114,7 @@ namespace caffe
     void SoftmaxWithLossLayer<Dtype>::Forward_cpu (
         const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top)
     {
+		// caffe使用cross_entropy求解loss，熵的意义可以参考：http://blog.csdn.net/rtygbwwwerr/article/details/50778098
         // The forward pass computes the softmax prob values.
         softmax_layer_->Forward (softmax_bottom_vec_, softmax_top_vec_);
         const Dtype* prob_data = prob_.cpu_data();
@@ -134,8 +136,8 @@ namespace caffe
                 
                 DCHECK_GE (label_value, 0);
                 DCHECK_LT (label_value, prob_.shape (softmax_axis_));
-                loss -= log (std::max (prob_data[i * dim + label_value * inner_num_ + j],
-                                       Dtype (FLT_MIN)));
+				// 找到与标签值对应位的预测概率，概率越小，loss越大
+                loss -= log (std::max (prob_data[i * dim + label_value * inner_num_ + j], Dtype (FLT_MIN)));
                 ++count;
             }
         }

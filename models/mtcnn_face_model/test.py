@@ -109,7 +109,7 @@ def detectFace(img_path,threshold):
 # use above function to detect face and show detecting result
 
 threshold = [0.6,0.6,0.7]
-imgpath = r"./TVHID1130_4.jpg"
+imgpath = r"./TVHID1130_46.jpg"
 
 rectangles = detectFace(imgpath, threshold)
 img = cv2.imread(imgpath)

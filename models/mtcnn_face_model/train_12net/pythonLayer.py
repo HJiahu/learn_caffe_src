@@ -35,6 +35,7 @@ pts_list = r'C:\read_caffe_src\models\mtcnn_face_model\train_12net\prepare_data\
 cls_root = r'C:\read_caffe_src\models\mtcnn_face_model\train_12net\prepare_data/'
 roi_root = r'C:\read_caffe_src\models\mtcnn_face_model\train_12net\prepare_data/'
 pts_root = r'C:\read_caffe_src\models\mtcnn_face_model\train_12net\prepare_data/'
+
 class Data_Layer_train(caffe.Layer):
     def setup(self, bottom, top):
         self.batch_size = 64
@@ -218,7 +219,7 @@ class BatchLoader(object):
 ################################################################################
 class regression_Layer(caffe.Layer):
     def setup(self,bottom,top):
-        if len(bottom) != 2:
+        if len(bottom) != 2:# 一个网络输出一个ground truth
             raise Exception("Need 2 Inputs")
     def reshape(self,bottom,top):
         if bottom[0].count != bottom[1].count:
@@ -287,4 +288,4 @@ if __name__ == '__main__':
                           pts_root )
     a = loading.load_next_image(0)
     b = loading.load_next_image(1)
-    print(len(a),len(b),len(c))
+    print(len(a),len(b))

@@ -8,8 +8,7 @@ import numpy as np
 import google.protobuf as pb
 
 CAFFE_ROOT = r'D:\Programs\CaffeGPUBin'
-if osp.join(CAFFE_ROOT,'python') not in sys.path:
-        sys.path.insert(0,osp.join(CAFFE_ROOT,'python'))
+sys.path.append(osp.join(CAFFE_ROOT,'python'))
 
 import caffe
 import caffe.proto.caffe_pb2 as cp
@@ -22,6 +21,7 @@ temp_file = './temp.prototxt'
 class ConvertBnn:
     def __init__(self, model, weights, dest_model_dir, dest_weight_dir):
         self.net_model = caffe.Net(model, weights, caffe.TEST)
+        # 下面这条语句只能获得网络的结构，网络中的训练参数还没有载入
         self.net_param = self.get_netparameter(model)
         self.dest_model = None
         self.dest_param = self.get_netparameter(model)
@@ -33,12 +33,13 @@ class ConvertBnn:
 
     def pre_process(self):
         net_param = self.dest_param
+        # 获得所有层的结构与信息，例如输入与输出的维度、层的名称类型等
         layer_params = net_param.layer
         length = len(layer_params)
         i = 0
         while i < length:
-            print(i)
-            if layer_params[i].type in layer_type:
+            if layer_params[i].type in layer_type: # 当前文件只对两种类型的层（卷积和全连接）合并BN
+                # 确定后两层分别是bn和scale
                 if (i + 2 < length) and layer_params[i + 1].type == bnn_type[0] and \
                                 layer_params[i + 2].type == bnn_type[1]:
                     params = layer_params[i].param
@@ -84,6 +85,7 @@ class ConvertBnn:
                     self.dest_model.layers[i].blobs[1] = layer.blobs[1]
         print('asdf end')
 
+    # 这个函数主要读取网络的结构并返回
     def get_netparameter(self, model):
         with open(model) as f:
             net = cp.NetParameter()

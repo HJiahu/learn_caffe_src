@@ -11,6 +11,10 @@ namespace caffe
 {
 
     /**
+     * caffe 将BN层分为 了两层实现，一层用于将输入归一化，另一层用于变换重构，具体可以
+     * 参考：http://blog.csdn.net/hjimce/article/details/50866313 或
+     * http://blog.csdn.net/whitesilence/article/details/75667002， 当前层用于将
+     * 输入归一化后输出
      * @brief Normalizes the input to have 0-mean and/or unit (1) variance across
      *        the batch.
      *

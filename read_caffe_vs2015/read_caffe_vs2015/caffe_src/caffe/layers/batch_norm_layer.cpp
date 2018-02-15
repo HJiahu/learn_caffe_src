@@ -11,8 +11,14 @@ namespace caffe
     void BatchNormLayer<Dtype>::LayerSetUp (const vector<Blob<Dtype>*>& bottom,
                                             const vector<Blob<Dtype>*>& top)
     {
+        // 可参考 http://blog.csdn.net/lanran2/article/details/56278072
         BatchNormParameter param = this->layer_param_.batch_norm_param();
+        // BN层在训练的时候需要一个均值，这个均值是从整个训练集中的获得的
+        // 但是我们在训练的时候一次只使用一小部分的数据所以均值在训练的时候
+        // 需要更新，caffe没有使用简单的累加而是在累加的时候给旧值一个小于1的权值
+        // 这里moving_average_fraction_就是这个权值
         moving_average_fraction_ = param.moving_average_fraction();
+        // use_global_stats 是指Train还是Test，如果为True，那么就是指Test；
         use_global_stats_ = this->phase_ == TEST;
         
         if (param.has_use_global_stats())
@@ -24,6 +30,7 @@ namespace caffe
         else
         { channels_ = bottom[0]->shape (1); }
         
+        // 归一化的时候需要除以方差，为了防止除以0，一般给方差添加一个非0的整数
         eps_ = param.eps();
         
         if (this->blobs_.size() > 0)
@@ -33,6 +40,8 @@ namespace caffe
         
         else
         {
+            // 当前层有3个blob，分别保存每个通道的均值、方差和
+            // 前两个blob的大小和通道数相同，最后一个blob中只有一个元素
             this->blobs_.resize (3);
             vector<int> sz;
             sz.push_back (channels_);
@@ -41,6 +50,7 @@ namespace caffe
             sz[0] = 1;
             this->blobs_[2].reset (new Blob<Dtype> (sz));
             
+            // 将所有blob中的值都初始化为0
             for (int i = 0; i < 3; ++i)
             {
                 caffe_set (this->blobs_[i]->count(), Dtype (0),
@@ -74,15 +84,21 @@ namespace caffe
         if (bottom[0]->num_axes() >= 1)
         { CHECK_EQ (bottom[0]->shape (1), channels_); }
         
+        // 因为当前层只是将输入归一化所以输入和输出的尺寸是相同的
         top[0]->ReshapeLike (*bottom[0]);
         vector<int> sz;
+        // //定义mean_，variance_，temp_，x_norm_，batch_sum_multiplier_的形状
         sz.push_back (channels_);
+        // 每一个channel对应一个均值与一个方差
         mean_.Reshape (sz);
         variance_.Reshape (sz);
+        // temp_和x_norm_的形状和输入输出相同
         temp_.ReshapeLike (*bottom[0]);
         x_norm_.ReshapeLike (*bottom[0]);
+        // batch_sum_multiplier_中元素的个数等于num
         sz[0] = bottom[0]->shape (0);
         batch_sum_multiplier_.Reshape (sz);
+        // 每一个channel中元素的个数
         int spatial_dim = bottom[0]->count() / (channels_ * bottom[0]->shape (0));
         
         if (spatial_sum_multiplier_.num_axes() == 0 ||
@@ -96,6 +112,7 @@ namespace caffe
         
         int numbychans = channels_ * bottom[0]->shape (0);
         
+        // 定义 num_by_chans_ 的形状为channels_*bottom[0]->shape(0)
         if (num_by_chans_.num_axes() == 0 ||
                 num_by_chans_.shape (0) != numbychans)
         {
@@ -115,11 +132,14 @@ namespace caffe
         int num = bottom[0]->shape (0);
         int spatial_dim = bottom[0]->count() / (bottom[0]->shape (0) * channels_);
         
+        // 如果bottom和top的值不相同，就把bottom中的值赋给top
         if (bottom[0] != top[0])
         {
             caffe_copy (bottom[0]->count(), bottom_data, top_data);
         }
         
+        // 如果 use_global_stats_ 为true则说明是TEST，使用已计算好的均值与方差
+        // 其中mean保存在blobs_[0]中，variance保存在blobs_[1]中
         if (use_global_stats_)
         {
             // use the stored mean/variance estimates.
@@ -131,13 +151,27 @@ namespace caffe
                              this->blobs_[1]->cpu_data(), variance_.mutable_cpu_data());
         }
         
+        // 如果 use_global_stats_ 为 true 则说明是TEST，则均值与方差需要通过计算获得
         else
         {
             // compute mean
+            // 这个矩阵与向量相乘，目的是计算每个feature map的数值和，然后在除以1./(num*spatial_dim)
+            // bottom_data: (channels_*num) x (spatial_dim)
+            // spatial_sum_multiplier: spatial_dim x 1
+            // alpha : 1./(num*spatial_dim); beta : 0
+            // num_by_chans = alpha * (bottom_data x spatial_sum_multiplier) + beta * num_by_chans
+            // 其中spatial_sum_multiplier的值都为1
             caffe_cpu_gemv<Dtype> (CblasNoTrans, channels_ * num, spatial_dim,
                                    1. / (num * spatial_dim), bottom_data,
                                    spatial_sum_multiplier_.cpu_data(), 0.,
                                    num_by_chans_.mutable_cpu_data());
+            // 注意关键字是CblasTrans！！
+            // num_by_chans_ : channels_ x num;
+            // batch_sum_multiplier_ : num x 1;
+            // mean_ = 1. x (num_by_chans_ x batch_sum_multiplier_)
+            // mean_ : channels_ x 1
+            // 计算得到对应channels的平均值，这也解释了为什么之前要除以1./(num*spatial_dim)
+            // 而不是仅除以1./spatial_dim，这样减少了计算量
             caffe_cpu_gemv<Dtype> (CblasTrans, num, channels_, 1.,
                                    num_by_chans_.cpu_data(), batch_sum_multiplier_.cpu_data(), 0.,
                                    mean_.mutable_cpu_data());
@@ -147,6 +181,7 @@ namespace caffe
         caffe_cpu_gemm<Dtype> (CblasNoTrans, CblasNoTrans, num, channels_, 1, 1,
                                batch_sum_multiplier_.cpu_data(), mean_.cpu_data(), 0.,
                                num_by_chans_.mutable_cpu_data());
+        // 最后的 top_data 保存的就是每个值减去对应channel的均值后的结果
         caffe_cpu_gemm<Dtype> (CblasNoTrans, CblasNoTrans, channels_ * num,
                                spatial_dim, 1, -1, num_by_chans_.cpu_data(),
                                spatial_sum_multiplier_.cpu_data(), 1., top_data);
